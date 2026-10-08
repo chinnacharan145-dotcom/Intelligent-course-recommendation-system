@@ -1,0 +1,1827 @@
+INTELLIGENT COURSE RECOMMENDATION SYSTEM
+
+Complete Database Architecture & Design
+
+Engineering Student Academic + Recommendation + Learning Intelligence Platform
+
+Prepared as a production-oriented database blueprint
+
+1. Database Architecture Overview
+
+The database is designed as a normalized academic, student, skill, career, course, assessment, recommendation, learning and analytics database. The core intelligence loop is:
+
+Student Academic Profile → Skills → Interests → Career Goal → Courses → Prerequisites → Recommendations → Learning → Assessment → Skill Update → New Recommendations
+
+Logical Architecture
+
+                         UNIVERSITY                              │                              ▼                           COLLEGE                              │                              ▼                           PROGRAM                              │                              ▼                            BRANCH                              │                              ▼                         CURRICULUM                              │                              ▼                           SEMESTER                              │                              ▼                    CURRICULUM_SUBJECT                              │                              ▼                           SUBJECTUSER → STUDENT_PROFILE              │      ┌───────┼────────┐      ▼       ▼        ▼ STUDENT_SKILL  STUDENT_INTEREST  STUDENT_CAREER_GOAL      │       │        │      ▼       ▼        ▼    SKILL   INTEREST   CAREER      │                 │      └──────┬──────────┘             ▼      RECOMMENDATION ENGINE             │             ▼       RECOMMENDATION             │             ▼           COURSE      ┌──────┼──────┐      ▼      ▼      ▼COURSE_SKILL COURSE_CAREER COURSE_INTEREST             │             ▼       COURSE_PREREQUISITESTUDENT → ASSESSMENT_ATTEMPT → STUDENT_ANSWERSTUDENT → ENROLLMENT → LEARNING_ACTIVITYRECOMMENDATION → RECOMMENDATION_FEEDBACK / RECOMMENDATION_EVENT
+
+Database Design Philosophy
+
+Use approximately Third Normal Form (3NF) for transactional data.
+
+Separate master/reference data from student transactions and learning events.
+
+Use junction tables for many-to-many relationships instead of comma-separated strings.
+
+Keep recommendation component scores separately so recommendations are explainable.
+
+Use foreign keys and unique constraints to maintain referential integrity.
+
+Design Django models in a database-agnostic way so SQLite can be used for development and PostgreSQL for production.
+
+2. Database Domains and Tables
+
+Domain
+
+Main Tables
+
+Authentication
+
+User, Role
+
+Academic
+
+University, College, Program, Branch, Regulation, Curriculum, Semester, Subject, CurriculumSubject
+
+Student
+
+StudentProfile, StudentSkill, StudentInterest, StudentCareerGoal
+
+Skills
+
+SkillCategory, Skill, SkillPrerequisite
+
+Careers
+
+Career, CareerSkill, CareerInterest, CareerBranch
+
+Courses
+
+CourseProvider, CourseCategory, Course, CourseSkill, CourseInterest, CourseCareer, CourseBranch, CoursePrerequisite
+
+Assessment
+
+Assessment, Question, Option, AssessmentAttempt, StudentAnswer
+
+Recommendation
+
+Recommendation, RecommendationFeedback
+
+Learning
+
+Enrollment, Bookmark, LearningActivity
+
+Analytics
+
+RecommendationEvent, AuditLog
+
+3. Authentication Database
+
+3.1 User
+
+Field
+
+Type / Rule
+
+Purpose
+
+id
+
+PK
+
+User identifier
+
+username
+
+Unique
+
+Login username
+
+email
+
+UNIQUE
+
+User email
+
+password
+
+Hashed
+
+Authentication
+
+first_name
+
+Text
+
+First name
+
+last_name
+
+Text
+
+Last name
+
+role_id
+
+FK → Role
+
+Authorization role
+
+is_active
+
+Boolean
+
+Account status
+
+is_staff
+
+Boolean
+
+Django staff access
+
+created_at
+
+DateTime
+
+Creation time
+
+updated_at
+
+DateTime
+
+Last update
+
+last_login
+
+DateTime
+
+Last login
+
+3.2 Role
+
+Field
+
+Type / Rule
+
+Purpose
+
+id
+
+PK
+
+Role identifier
+
+name
+
+Text
+
+Student / Faculty / Admin
+
+description
+
+Text
+
+Role description
+
+Recommended roles: Student, Faculty, Admin.
+
+4. Academic Database Architecture
+
+Relationship: University → College → Program → Branch → Curriculum → Semester → CurriculumSubject → Subject, with Regulation associated with Curriculum.
+
+4.1 University
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+name
+
+Text
+
+short_name
+
+Text
+
+state
+
+Text
+
+city
+
+Text
+
+website
+
+URL/Text
+
+university_type
+
+Text
+
+is_active
+
+Boolean
+
+created_at
+
+DateTime
+
+updated_at
+
+DateTime
+
+4.2 College
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+university_id
+
+FK → University
+
+name
+
+Text
+
+code
+
+Text
+
+city
+
+Text
+
+district
+
+Text
+
+college_type
+
+Text
+
+website
+
+URL/Text
+
+is_autonomous
+
+Boolean
+
+is_active
+
+Boolean
+
+created_at
+
+DateTime
+
+updated_at
+
+DateTime
+
+4.3 Program
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+name
+
+Text
+
+level
+
+Text
+
+duration_years
+
+Number
+
+4.4 Branch
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+program_id
+
+FK → Program
+
+name
+
+Text
+
+code
+
+Text
+
+description
+
+Text
+
+4.5 Regulation
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+university_id
+
+FK → University
+
+name
+
+Text
+
+code
+
+Text
+
+effective_year
+
+Number
+
+description
+
+Text
+
+is_active
+
+Boolean
+
+4.6 Curriculum
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+branch_id
+
+FK → Branch
+
+regulation_id
+
+FK → Regulation
+
+name
+
+Text
+
+version
+
+Text
+
+academic_year
+
+Text
+
+description
+
+Text
+
+4.7 Semester
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+curriculum_id
+
+FK → Curriculum
+
+semester_number
+
+Number
+
+name
+
+Text
+
+4.8 Subject
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+code
+
+Text
+
+name
+
+Text
+
+description
+
+Text
+
+credits
+
+Number
+
+subject_type
+
+Text
+
+4.9 CurriculumSubject
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+curriculum_id
+
+FK → Curriculum
+
+semester_id
+
+FK → Semester
+
+subject_id
+
+FK → Subject
+
+course_type
+
+Text
+
+credits
+
+Number
+
+is_core
+
+Boolean
+
+5. Student Database
+
+5.1 StudentProfile
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+user_id
+
+FK → User, UNIQUE
+
+college_id
+
+FK → College
+
+university_id
+
+FK → University
+
+program_id
+
+FK → Program
+
+branch_id
+
+FK → Branch
+
+regulation_id
+
+FK → Regulation
+
+curriculum_id
+
+FK → Curriculum
+
+admission_year
+
+Number
+
+current_year
+
+Number
+
+current_semester
+
+Number
+
+cgpa
+
+Decimal
+
+weekly_learning_hours
+
+Decimal
+
+preferred_difficulty
+
+Text
+
+learning_mode
+
+Text
+
+onboarding_completed
+
+Boolean
+
+created_at
+
+DateTime
+
+updated_at
+
+DateTime
+
+5.2 StudentSkill
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+skill_id
+
+FK → Skill
+
+proficiency
+
+0–5
+
+confidence
+
+Numeric
+
+source
+
+SELF_REPORTED / ASSESSMENT / COURSE_COMPLETION / SYSTEM_INFERRED
+
+last_assessed_at
+
+DateTime
+
+created_at
+
+DateTime
+
+updated_at
+
+DateTime
+
+Proficiency scale: 0 Unknown, 1 Beginner, 2 Elementary, 3 Intermediate, 4 Advanced, 5 Expert.
+
+5.3 Interest
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+name
+
+Text
+
+description
+
+Text
+
+5.4 StudentInterest
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+interest_id
+
+FK → Interest
+
+priority
+
+1–5
+
+5.5 StudentCareerGoal
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+career_id
+
+FK → Career
+
+priority
+
+1–5
+
+target_date
+
+Date/Nullable
+
+6. Skill Database
+
+6.1 SkillCategory
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+name
+
+Text
+
+description
+
+Text
+
+6.2 Skill
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+category_id
+
+FK → SkillCategory
+
+name
+
+Text
+
+description
+
+Text
+
+difficulty
+
+Text
+
+Example categories: Programming, Database, AI, Machine Learning, Cloud, Cybersecurity, Networking, DevOps, Web Development, Data Science.
+
+Example skills: Python, Java, C, C++, SQL, HTML, CSS, JavaScript, Machine Learning, Deep Learning, Docker, AWS, NumPy, Pandas, Statistics.
+
+6.3 SkillPrerequisite
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+skill_id
+
+FK → Skill
+
+prerequisite_skill_id
+
+FK → Skill
+
+is_mandatory
+
+Boolean
+
+Example dependency: Deep Learning ← Machine Learning ← Python.
+
+7. Career Database
+
+7.1 Career
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+name
+
+Text
+
+description
+
+Text
+
+salary_range
+
+Text
+
+demand_level
+
+Text
+
+career_category
+
+Text
+
+7.2 CareerSkill
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+career_id
+
+FK → Career
+
+skill_id
+
+FK → Skill
+
+required_level
+
+0–5
+
+importance
+
+0–100
+
+is_required
+
+Boolean
+
+Example AI Engineer requirements: Python level 4, Statistics level 3, Machine Learning level 4, Deep Learning level 3, SQL level 3.
+
+7.3 CareerInterest
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+career_id
+
+FK → Career
+
+interest_id
+
+FK → Interest
+
+relevance_score
+
+0–100
+
+7.4 CareerBranch
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+career_id
+
+FK → Career
+
+branch_id
+
+FK → Branch
+
+relevance_score
+
+0–100
+
+8. Course Database
+
+8.1 CourseProvider
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+name
+
+Text
+
+website
+
+URL/Text
+
+provider_type
+
+Text
+
+is_active
+
+Boolean
+
+8.2 CourseCategory
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+name
+
+Text
+
+description
+
+Text
+
+8.3 Course
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+provider_id
+
+FK → CourseProvider
+
+category_id
+
+FK → CourseCategory
+
+title
+
+Text
+
+slug
+
+Unique
+
+description
+
+Text
+
+url
+
+URL
+
+difficulty
+
+Text
+
+duration_hours
+
+Decimal
+
+language
+
+Text
+
+cost_type
+
+Text
+
+certificate_available
+
+Boolean
+
+rating
+
+Decimal
+
+rating_count
+
+Integer
+
+active
+
+Boolean
+
+source_type
+
+Text
+
+source_url
+
+URL/Text
+
+last_verified_at
+
+DateTime
+
+created_at
+
+DateTime
+
+updated_at
+
+DateTime
+
+8.4 CourseSkill
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+course_id
+
+FK → Course
+
+skill_id
+
+FK → Skill
+
+relationship_type
+
+Text
+
+importance
+
+0–100
+
+8.5 CourseCareer
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+course_id
+
+FK → Course
+
+career_id
+
+FK → Career
+
+relevance_score
+
+0–100
+
+8.6 CourseInterest
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+course_id
+
+FK → Course
+
+interest_id
+
+FK → Interest
+
+relevance_score
+
+0–100
+
+8.7 CourseBranch
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+course_id
+
+FK → Course
+
+branch_id
+
+FK → Branch
+
+relevance_score
+
+0–100
+
+8.8 CoursePrerequisite
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+course_id
+
+FK → Course
+
+prerequisite_course_id
+
+FK → Course
+
+is_mandatory
+
+Boolean
+
+minimum_level
+
+Text
+
+Example course mapping: Machine Learning → AI Engineer relevance 95, Data Scientist relevance 92, Data Analyst relevance 70. Course skills can be marked TAUGHT or REQUIRED.
+
+9. Assessment Database
+
+9.1 Assessment
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+skill_id
+
+FK → Skill
+
+title
+
+Text
+
+description
+
+Text
+
+duration_minutes
+
+Integer
+
+passing_score
+
+Decimal
+
+difficulty
+
+Text
+
+is_active
+
+Boolean
+
+9.2 Question
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+assessment_id
+
+FK → Assessment
+
+question_text
+
+Text
+
+question_type
+
+Text
+
+marks
+
+Decimal
+
+difficulty
+
+Text
+
+order_number
+
+Integer
+
+9.3 Option
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+question_id
+
+FK → Question
+
+option_text
+
+Text
+
+is_correct
+
+Boolean
+
+9.4 AssessmentAttempt
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+assessment_id
+
+FK → Assessment
+
+started_at
+
+DateTime
+
+submitted_at
+
+DateTime
+
+score
+
+Decimal
+
+percentage
+
+Decimal
+
+passed
+
+Boolean
+
+previous_proficiency
+
+0–5
+
+new_proficiency
+
+0–5
+
+9.5 StudentAnswer
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+attempt_id
+
+FK → AssessmentAttempt
+
+question_id
+
+FK → Question
+
+selected_option_id
+
+FK → Option
+
+is_correct
+
+Boolean
+
+marks_obtained
+
+Decimal
+
+answered_at
+
+DateTime
+
+10. Recommendation Database
+
+10.1 Recommendation
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+course_id
+
+FK → Course
+
+rank
+
+Integer
+
+final_score
+
+Decimal
+
+career_score
+
+Decimal
+
+interest_score
+
+Decimal
+
+skill_score
+
+Decimal
+
+similarity_score
+
+Decimal
+
+branch_score
+
+Decimal
+
+semester_score
+
+Decimal
+
+difficulty_score
+
+Decimal
+
+prerequisite_penalty
+
+Decimal
+
+explanation_json
+
+JSON
+
+algorithm_version
+
+Text
+
+generated_at
+
+DateTime
+
+Storing component scores makes every recommendation explainable and auditable.
+
+10.2 RecommendationFeedback
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+recommendation_id
+
+FK → Recommendation
+
+feedback_type
+
+THUMBS_UP / THUMBS_DOWN
+
+reason
+
+Text
+
+comment
+
+Text
+
+created_at
+
+DateTime
+
+11. Learning Database
+
+11.1 Enrollment
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+course_id
+
+FK → Course
+
+status
+
+NOT_STARTED / IN_PROGRESS / COMPLETED / DROPPED
+
+progress_percentage
+
+0–100
+
+started_at
+
+DateTime
+
+completed_at
+
+DateTime
+
+created_at
+
+DateTime
+
+updated_at
+
+DateTime
+
+11.2 Bookmark
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+course_id
+
+FK → Course
+
+created_at
+
+DateTime
+
+Unique constraint: (student_id, course_id).
+
+11.3 LearningActivity
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+course_id
+
+FK → Course
+
+activity_type
+
+Text
+
+duration_minutes
+
+Integer
+
+metadata_json
+
+JSON
+
+created_at
+
+DateTime
+
+Example activity types: COURSE_VIEW, VIDEO_WATCHED, QUIZ_COMPLETED, COURSE_STARTED, COURSE_COMPLETED.
+
+12. Analytics and Audit Database
+
+12.1 RecommendationEvent
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+student_id
+
+FK → StudentProfile
+
+recommendation_id
+
+FK → Recommendation
+
+event_type
+
+VIEWED / CLICKED / BOOKMARKED / STARTED / COMPLETED / DISMISSED
+
+metadata_json
+
+JSON
+
+created_at
+
+DateTime
+
+12.2 AuditLog
+
+Field
+
+Type / Rule
+
+id
+
+PK
+
+user_id
+
+FK → User
+
+action
+
+Text
+
+entity_type
+
+Text
+
+entity_id
+
+Integer
+
+old_values_json
+
+JSON
+
+new_values_json
+
+JSON
+
+ip_address
+
+Text
+
+created_at
+
+DateTime
+
+AuditLog is optional for an academic prototype but recommended for administrative traceability.
+
+13. Complete ER Diagram
+
+UNIVERSITY 1 ───── N COLLEGEUNIVERSITY 1 ───── N REGULATIONPROGRAM 1 ─────── N BRANCHBRANCH 1 ───────── N CURRICULUMREGULATION 1 ───── N CURRICULUMCURRICULUM 1 ───── N SEMESTERCURRICULUM N ───── N SUBJECT (through CURRICULUM_SUBJECT)USER 1 ─────────── 1 STUDENT_PROFILESTUDENT_PROFILE 1 ─ N STUDENT_SKILL ─ N SKILLSTUDENT_PROFILE N ─ N INTEREST (through STUDENT_INTEREST)STUDENT_PROFILE N ─ N CAREER (through STUDENT_CAREER_GOAL)CAREER N ───────── N SKILL (through CAREER_SKILL)CAREER N ───────── N INTEREST (through CAREER_INTEREST)CAREER N ───────── N BRANCH (through CAREER_BRANCH)COURSE N ───────── N SKILL (through COURSE_SKILL)COURSE N ───────── N CAREER (through COURSE_CAREER)COURSE N ───────── N INTEREST (through COURSE_INTEREST)COURSE N ───────── N BRANCH (through COURSE_BRANCH)COURSE N ───────── N COURSE (through COURSE_PREREQUISITE)SKILL N ────────── N SKILL (through SKILL_PREREQUISITE)STUDENT_PROFILE 1 ─ N ASSESSMENT_ATTEMPTASSESSMENT 1 ───── N QUESTIONQUESTION 1 ─────── N OPTIONASSESSMENT_ATTEMPT 1 ─ N STUDENT_ANSWERSTUDENT_PROFILE 1 ─ N ENROLLMENTSTUDENT_PROFILE 1 ─ N BOOKMARKSTUDENT_PROFILE 1 ─ N LEARNING_ACTIVITYSTUDENT_PROFILE 1 ─ N RECOMMENDATIONRECOMMENDATION 1 ─ N RECOMMENDATION_FEEDBACKRECOMMENDATION 1 ─ N RECOMMENDATION_EVENT
+
+14. Cardinality Summary
+
+Relationship
+
+Cardinality
+
+University → College
+
+1:N
+
+University → Regulation
+
+1:N
+
+Program → Branch
+
+1:N
+
+Branch → Curriculum
+
+1:N
+
+Regulation → Curriculum
+
+1:N
+
+Curriculum → Semester
+
+1:N
+
+Curriculum → Subject
+
+M:N through CurriculumSubject
+
+Student → StudentSkill
+
+1:N
+
+Skill → StudentSkill
+
+1:N
+
+Student → Interest
+
+M:N through StudentInterest
+
+Student → Career
+
+M:N through StudentCareerGoal
+
+Career → Skill
+
+M:N through CareerSkill
+
+Course → Skill
+
+M:N through CourseSkill
+
+Course → Career
+
+M:N through CourseCareer
+
+Course → Interest
+
+M:N through CourseInterest
+
+Course → Branch
+
+M:N through CourseBranch
+
+Course → Course
+
+M:N through CoursePrerequisite
+
+Skill → Skill
+
+M:N through SkillPrerequisite
+
+Student → AssessmentAttempt
+
+1:N
+
+Assessment → Question
+
+1:N
+
+Question → Option
+
+1:N
+
+Student → Enrollment
+
+1:N
+
+Student → Recommendation
+
+1:N
+
+Course → Recommendation
+
+1:N
+
+15. Recommendation Intelligence Data Flow
+
+STUDENT  ↓StudentProfile  ↓Skills + Interests + Career Goals + Academic Context  ↓Recommendation Engine  ↓Candidate Courses  ↓Career Match + Interest Match + Skill Relevance + Content Similarity+ Branch Match + Semester Suitability + Difficulty Match  ↓Prerequisite Evaluation / Penalty  ↓Final Recommendation Score  ↓Ranked Courses + Explainable Evidence  ↓Student Interaction  ↓Enrollment / Learning Activity / Assessment / Feedback  ↓Student Skill Update  ↓Recommendation Recalculation
+
+This closed-loop architecture turns the project into an adaptive recommendation platform instead of a static course-search application.
+
+16. Recommended Indexes
+
+Table
+
+Recommended Indexes
+
+StudentProfile
+
+user_id, college_id, branch_id, regulation_id, current_semester
+
+Course
+
+provider_id, category_id, difficulty, active
+
+Skill
+
+category_id, name
+
+Recommendation
+
+student_id, course_id, final_score, generated_at
+
+Assessment
+
+skill_id, is_active
+
+Enrollment
+
+student_id, course_id, status
+
+LearningActivity
+
+student_id, course_id, activity_type, created_at
+
+RecommendationEvent
+
+student_id, recommendation_id, event_type, created_at
+
+17. Unique Constraints and Integrity Rules
+
+User.email UNIQUE.
+
+StudentProfile.user UNIQUE.
+
+StudentSkill (student_id, skill_id) UNIQUE.
+
+StudentInterest (student_id, interest_id) UNIQUE.
+
+StudentCareerGoal (student_id, career_id) UNIQUE.
+
+Bookmark (student_id, course_id) UNIQUE.
+
+Enrollment (student_id, course_id) UNIQUE.
+
+CourseSkill (course_id, skill_id) UNIQUE.
+
+CourseCareer (course_id, career_id) UNIQUE.
+
+CourseInterest (course_id, interest_id) UNIQUE.
+
+CourseBranch (course_id, branch_id) UNIQUE.
+
+Use foreign-key constraints with suitable delete behavior; protect master data where historical transactions depend on it.
+
+18. Database Technology Recommendation
+
+Environment
+
+Recommended Stack
+
+Development / College Demo
+
+Django ORM + SQLite
+
+Testing
+
+Django Test Framework + SQLite/Test DB
+
+Production
+
+Django ORM + PostgreSQL
+
+Analytics / ML
+
+Python + pandas + NumPy + scikit-learn
+
+SQLite provides zero-setup portability for a student project. PostgreSQL is the recommended production database. Avoid SQLite-specific SQL so migration remains straightforward.
+
+19. Important Design Improvements
+
+CurriculumSubject is essential because the same subject can appear differently across regulations and curricula.
+
+Recommendation stores component scores and explanation JSON so the UI can answer “Why was this course recommended?”.
+
+RecommendationEvent captures user behavior for future recommender improvements.
+
+CoursePrerequisite and SkillPrerequisite should be separate because course dependencies and skill dependencies represent different concepts.
+
+Course source_url and last_verified_at support external course-data maintenance.
+
+StudentSkill.source distinguishes self-reported proficiency from assessment-derived or system-inferred proficiency.
+
+20. Final Database Architecture
+
+The final database can be viewed as seven connected intelligence layers:1. ACADEMIC LAYER   University → College → Program → Branch → Regulation → Curriculum → Semester → Subject2. STUDENT LAYER   User → StudentProfile → StudentSkill / StudentInterest / StudentCareerGoal3. KNOWLEDGE LAYER   Skill → SkillPrerequisite   Career → CareerSkill / CareerInterest / CareerBranch4. COURSE LAYER   Provider → CourseCategory → Course   CourseSkill / CourseCareer / CourseInterest / CourseBranch / CoursePrerequisite5. ASSESSMENT LAYER   Assessment → Question → Option   AssessmentAttempt → StudentAnswer6. RECOMMENDATION + LEARNING LAYER   Recommendation → Feedback   Enrollment → Bookmark → LearningActivity7. INTELLIGENCE + GOVERNANCE LAYER   RecommendationEvent → analytics   AuditLog → administrative traceabilityCore loop:Academic Data + Student Data + Skill Data + Career Data + Course Data+ Assessment Data + Learning Data + Recommendation Events→ Intelligent Course Recommendation Engine.
+
+21. Implementation Checklist
+
+Create custom Django User model before initial migrations.
+
+Create academic master tables and seed AP-focused university/college/regulation/curriculum data.
+
+Create Skill, Career and prerequisite relationships.
+
+Create Course and all many-to-many junction tables.
+
+Create StudentProfile and onboarding relationships.
+
+Create assessment and scoring tables.
+
+Create Recommendation and RecommendationFeedback.
+
+Create Enrollment, Bookmark and LearningActivity.
+
+Create RecommendationEvent and optional AuditLog.
+
+Add indexes and unique constraints.
+
+Run migrations and seed data.
+
+Write model, API, recommendation-engine and assessment tests.
+
+Verify the end-to-end loop: onboarding → recommendation → assessment → skill update → recommendation refresh.

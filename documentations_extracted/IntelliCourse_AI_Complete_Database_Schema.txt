@@ -1,0 +1,2699 @@
+INTELLICOURSE AI
+
+Complete Database Schema & Production Design Specification
+
+Academic Intelligence • Career Direction • Next Skill
+
+PostgreSQL + Django REST Framework
+
+Implementation-ready reference for IntelliCourse AI
+
+1. Document Purpose
+
+This document consolidates the complete database information supplied for IntelliCourse AI. It preserves the 47-table logical schema, fields, relationships, constraints, indexes, production recommendations, and the identified improvements required for a mature implementation.
+
+Core Intelligence Loop
+
+Student → Academic Profile → Skills → Career Goal → Career Requirements → Skill Gap → Recommendation Engine → Learning Path → Assessment → Skill Update → Career Readiness → Next Best Action → Student
+
+2. Authentication
+
+users
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+email
+
+VARCHAR(255)
+
+UNIQUE, NOT NULL
+
+password_hash
+
+VARCHAR(255)
+
+NOT NULL
+
+first_name
+
+VARCHAR(100)
+
+NOT NULL
+
+last_name
+
+VARCHAR(100)
+
+NULL
+
+is_active
+
+BOOLEAN
+
+DEFAULT TRUE
+
+is_staff
+
+BOOLEAN
+
+DEFAULT FALSE
+
+is_verified
+
+BOOLEAN
+
+DEFAULT FALSE
+
+last_login
+
+TIMESTAMP
+
+NULL
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+user_roles
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+name
+
+VARCHAR(50)
+
+UNIQUE
+
+description
+
+TEXT
+
+3. Academic Master Data
+
+universities
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+name
+
+VARCHAR
+
+UNIQUE, NOT NULL
+
+code
+
+VARCHAR
+
+UNIQUE
+
+website
+
+VARCHAR
+
+is_active
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+colleges
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+university_id
+
+UUID
+
+FK → universities
+
+name
+
+VARCHAR
+
+code
+
+VARCHAR
+
+location
+
+VARCHAR
+
+website
+
+VARCHAR
+
+is_active
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(university_id, name)
+
+branches
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+name
+
+VARCHAR
+
+code
+
+VARCHAR
+
+UNIQUE
+
+description
+
+TEXT
+
+is_active
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+regulations
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+university_id
+
+UUID
+
+FK → universities
+
+name
+
+VARCHAR
+
+description
+
+TEXT
+
+start_year
+
+INTEGER
+
+end_year
+
+INTEGER
+
+NULL
+
+is_active
+
+BOOLEAN
+
+academic_years
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+name
+
+VARCHAR
+
+start_date
+
+DATE
+
+end_date
+
+DATE
+
+is_active
+
+BOOLEAN
+
+semesters
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+number
+
+INTEGER
+
+name
+
+VARCHAR
+
+description
+
+TEXT
+
+subjects
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+code
+
+VARCHAR
+
+UNIQUE
+
+name
+
+VARCHAR
+
+description
+
+TEXT
+
+credits
+
+DECIMAL
+
+is_active
+
+BOOLEAN
+
+branch_subjects
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+branch_id
+
+UUID
+
+FK → branches
+
+regulation_id
+
+UUID
+
+FK → regulations
+
+semester_id
+
+UUID
+
+FK → semesters
+
+subject_id
+
+UUID
+
+FK → subjects
+
+is_elective
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(branch_id, regulation_id, semester_id, subject_id)
+
+4. Student Profile
+
+student_profiles
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+user_id
+
+UUID
+
+FK, UNIQUE
+
+college_id
+
+UUID
+
+FK → colleges
+
+university_id
+
+UUID
+
+FK → universities
+
+branch_id
+
+UUID
+
+FK → branches
+
+regulation_id
+
+UUID
+
+FK → regulations
+
+academic_year_id
+
+UUID
+
+FK → academic_years
+
+semester_id
+
+UUID
+
+FK → semesters
+
+year
+
+INTEGER
+
+cgpa
+
+DECIMAL(4,2)
+
+weekly_study_hours
+
+DECIMAL(5,2)
+
+bio
+
+TEXT
+
+avatar
+
+VARCHAR
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+interests
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+name
+
+VARCHAR
+
+UNIQUE
+
+description
+
+TEXT
+
+category
+
+VARCHAR
+
+is_active
+
+BOOLEAN
+
+student_interests
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+interest_id
+
+UUID
+
+FK
+
+interest_level
+
+INTEGER
+
+created_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(student_id, interest_id)
+
+student_career_goals
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+career_id
+
+UUID
+
+FK
+
+priority
+
+INTEGER
+
+is_primary
+
+BOOLEAN
+
+target_date
+
+DATE
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+5. Skills
+
+skill_categories
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+name
+
+VARCHAR
+
+UNIQUE
+
+description
+
+TEXT
+
+skills
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+category_id
+
+UUID
+
+FK
+
+name
+
+VARCHAR
+
+UNIQUE
+
+description
+
+TEXT
+
+difficulty
+
+VARCHAR
+
+is_active
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+skill_prerequisites
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+skill_id
+
+UUID
+
+FK → skills
+
+prerequisite_skill_id
+
+UUID
+
+FK → skills
+
+minimum_level
+
+INTEGER
+
+created_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(skill_id, prerequisite_skill_id)
+
+student_skills
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+skill_id
+
+UUID
+
+FK
+
+proficiency
+
+INTEGER
+
+0–100
+
+confidence
+
+INTEGER
+
+0–100
+
+source
+
+VARCHAR
+
+last_assessed
+
+TIMESTAMP
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(student_id, skill_id)
+
+student_skill_history
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_skill_id
+
+UUID
+
+FK
+
+old_proficiency
+
+INTEGER
+
+new_proficiency
+
+INTEGER
+
+old_confidence
+
+INTEGER
+
+new_confidence
+
+INTEGER
+
+source
+
+VARCHAR
+
+reason
+
+TEXT
+
+created_at
+
+TIMESTAMP
+
+6. Careers
+
+careers
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+name
+
+VARCHAR
+
+UNIQUE
+
+description
+
+TEXT
+
+industry_demand
+
+VARCHAR
+
+salary_min
+
+DECIMAL
+
+salary_max
+
+DECIMAL
+
+currency
+
+VARCHAR
+
+DEFAULT INR
+
+job_outlook
+
+TEXT
+
+typical_roles
+
+TEXT/JSON
+
+education_requirements
+
+TEXT/JSON
+
+is_active
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+career_skill_requirements
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+career_id
+
+UUID
+
+FK
+
+skill_id
+
+UUID
+
+FK
+
+required_level
+
+INTEGER
+
+0–100
+
+importance
+
+INTEGER
+
+weight
+
+DECIMAL
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(career_id, skill_id)
+
+7. Courses
+
+course_categories
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+name
+
+VARCHAR
+
+UNIQUE
+
+description
+
+TEXT
+
+is_active
+
+BOOLEAN
+
+course_providers
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+name
+
+VARCHAR
+
+UNIQUE
+
+website
+
+VARCHAR
+
+description
+
+TEXT
+
+is_active
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+courses
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+category_id
+
+UUID
+
+FK
+
+provider_id
+
+UUID
+
+FK
+
+title
+
+VARCHAR
+
+description
+
+TEXT
+
+url
+
+VARCHAR
+
+difficulty
+
+VARCHAR
+
+duration_hours
+
+DECIMAL
+
+rating
+
+DECIMAL
+
+0–5
+
+thumbnail
+
+VARCHAR
+
+is_free
+
+BOOLEAN
+
+is_active
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+course_skills
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+course_id
+
+UUID
+
+FK
+
+skill_id
+
+UUID
+
+FK
+
+level
+
+INTEGER
+
+created_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(course_id, skill_id)
+
+course_prerequisites
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+course_id
+
+UUID
+
+FK
+
+required_skill_id
+
+UUID
+
+FK → skills
+
+minimum_level
+
+INTEGER
+
+is_mandatory
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(course_id, required_skill_id)
+
+8. Recommendations
+
+recommendations
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+course_id
+
+UUID
+
+FK
+
+career_id
+
+UUID
+
+FK, NULL
+
+match_score
+
+DECIMAL
+
+0–100
+
+career_match_score
+
+DECIMAL
+
+skill_match_score
+
+DECIMAL
+
+interest_match_score
+
+DECIMAL
+
+branch_match_score
+
+DECIMAL
+
+semester_match_score
+
+DECIMAL
+
+difficulty_match_score
+
+DECIMAL
+
+content_similarity_score
+
+DECIMAL
+
+status
+
+VARCHAR
+
+generated_at
+
+TIMESTAMP
+
+expires_at
+
+TIMESTAMP, NULL
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+recommendation_reasons
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+recommendation_id
+
+UUID
+
+FK
+
+reason_type
+
+VARCHAR
+
+reason_text
+
+TEXT
+
+priority
+
+INTEGER
+
+created_at
+
+TIMESTAMP
+
+9. Assessments
+
+assessments
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+title
+
+VARCHAR
+
+description
+
+TEXT
+
+assessment_type
+
+VARCHAR
+
+duration_minutes
+
+INTEGER
+
+total_marks
+
+DECIMAL
+
+passing_marks
+
+DECIMAL
+
+is_active
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+assessment_questions
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+assessment_id
+
+UUID
+
+FK
+
+skill_id
+
+UUID
+
+FK
+
+question_text
+
+TEXT
+
+question_type
+
+VARCHAR
+
+marks
+
+DECIMAL
+
+difficulty
+
+VARCHAR
+
+question_order
+
+INTEGER
+
+created_at
+
+TIMESTAMP
+
+assessment_options
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+question_id
+
+UUID
+
+FK
+
+option_text
+
+TEXT
+
+is_correct
+
+BOOLEAN
+
+option_order
+
+INTEGER
+
+created_at
+
+TIMESTAMP
+
+assessment_attempts
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+assessment_id
+
+UUID
+
+FK
+
+started_at
+
+TIMESTAMP
+
+submitted_at
+
+TIMESTAMP NULL
+
+status
+
+VARCHAR
+
+score
+
+DECIMAL
+
+percentage
+
+DECIMAL
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+student_answers
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+attempt_id
+
+UUID
+
+FK
+
+question_id
+
+UUID
+
+FK
+
+selected_option_id
+
+UUID
+
+FK, NULL
+
+answer_text
+
+TEXT, NULL
+
+is_correct
+
+BOOLEAN
+
+marks_obtained
+
+DECIMAL
+
+answered_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(attempt_id, question_id)
+
+assessment_results
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+attempt_id
+
+UUID
+
+FK, UNIQUE
+
+total_questions
+
+INTEGER
+
+correct_answers
+
+INTEGER
+
+incorrect_answers
+
+INTEGER
+
+unanswered
+
+INTEGER
+
+total_marks
+
+DECIMAL
+
+marks_obtained
+
+DECIMAL
+
+percentage
+
+DECIMAL
+
+skill_level
+
+INTEGER
+
+created_at
+
+TIMESTAMP
+
+assessment_skill_results
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+assessment_result_id
+
+UUID
+
+FK
+
+skill_id
+
+UUID
+
+FK
+
+questions_count
+
+INTEGER
+
+correct_count
+
+INTEGER
+
+percentage
+
+DECIMAL
+
+skill_score
+
+DECIMAL
+
+created_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(assessment_result_id, skill_id)
+
+10. Learning
+
+student_courses
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+course_id
+
+UUID
+
+FK
+
+status
+
+VARCHAR
+
+SAVED / IN_PROGRESS / COMPLETED / DROPPED
+
+progress
+
+DECIMAL
+
+0–100
+
+started_at
+
+TIMESTAMP
+
+completed_at
+
+TIMESTAMP
+
+last_accessed
+
+TIMESTAMP
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(student_id, course_id)
+
+learning_activities
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+course_id
+
+UUID
+
+FK
+
+activity_type
+
+VARCHAR
+
+duration_minutes
+
+INTEGER
+
+metadata
+
+JSONB
+
+timestamp
+
+TIMESTAMP
+
+11. Roadmap
+
+roadmaps
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+career_id
+
+UUID
+
+FK
+
+title
+
+VARCHAR
+
+description
+
+TEXT
+
+overall_progress
+
+DECIMAL
+
+0–100
+
+status
+
+VARCHAR
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+roadmap_nodes
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+roadmap_id
+
+UUID
+
+FK
+
+skill_id
+
+UUID
+
+FK, NULL
+
+title
+
+VARCHAR
+
+description
+
+TEXT
+
+node_type
+
+VARCHAR
+
+sequence_order
+
+INTEGER
+
+status
+
+VARCHAR
+
+progress
+
+DECIMAL
+
+0–100
+
+estimated_hours
+
+DECIMAL
+
+completed_at
+
+TIMESTAMP
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+roadmap_node_skills
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+roadmap_node_id
+
+UUID
+
+FK
+
+skill_id
+
+UUID
+
+FK
+
+target_level
+
+INTEGER
+
+created_at
+
+TIMESTAMP
+
+constraint
+
+UNIQUE(roadmap_node_id, skill_id)
+
+12. Next Best Action
+
+actions
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+action_type
+
+VARCHAR
+
+title
+
+VARCHAR
+
+description
+
+TEXT
+
+priority_weight
+
+DECIMAL
+
+is_active
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+student_actions
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+action_id
+
+UUID
+
+FK
+
+reference_type
+
+VARCHAR
+
+reference_id
+
+UUID, NULL
+
+priority_score
+
+DECIMAL
+
+status
+
+VARCHAR
+
+generated_at
+
+TIMESTAMP
+
+started_at
+
+TIMESTAMP
+
+completed_at
+
+TIMESTAMP
+
+dismissed_at
+
+TIMESTAMP
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+13. AI Advisor
+
+ai_conversations
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+title
+
+VARCHAR
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+ai_messages
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+conversation_id
+
+UUID
+
+FK
+
+role
+
+VARCHAR
+
+message
+
+TEXT
+
+context
+
+JSONB, NULL
+
+created_at
+
+TIMESTAMP
+
+14. Notifications
+
+notifications
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK
+
+type
+
+VARCHAR
+
+title
+
+VARCHAR
+
+message
+
+TEXT
+
+priority
+
+VARCHAR
+
+is_read
+
+BOOLEAN
+
+action_url
+
+VARCHAR
+
+created_at
+
+TIMESTAMP
+
+read_at
+
+TIMESTAMP
+
+notification_preferences
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK, UNIQUE
+
+assessment_notifications
+
+BOOLEAN
+
+skill_notifications
+
+BOOLEAN
+
+career_notifications
+
+BOOLEAN
+
+course_notifications
+
+BOOLEAN
+
+recommendation_notifications
+
+BOOLEAN
+
+roadmap_notifications
+
+BOOLEAN
+
+ai_notifications
+
+BOOLEAN
+
+email_enabled
+
+BOOLEAN
+
+in_app_enabled
+
+BOOLEAN
+
+created_at
+
+TIMESTAMP
+
+updated_at
+
+TIMESTAMP
+
+15. Analytics
+
+analytics_events
+
+Field
+
+Type
+
+Constraint / Notes
+
+id
+
+UUID
+
+PK
+
+student_id
+
+UUID
+
+FK, NULL
+
+event_type
+
+VARCHAR
+
+entity_type
+
+VARCHAR, NULL
+
+entity_id
+
+UUID, NULL
+
+metadata
+
+JSONB
+
+ip_address
+
+INET, NULL
+
+user_agent
+
+TEXT
+
+created_at
+
+TIMESTAMP
+
+16. Recommendation & Intelligence Rules
+
+Recommendation scoring weights supplied for the platform:
+
+Factor
+
+Weight
+
+Career Match
+
+30%
+
+Skill Gap
+
+25%
+
+Interest
+
+15%
+
+Branch
+
+10%
+
+Semester
+
+10%
+
+Difficulty
+
+5%
+
+Content Similarity
+
+5%
+
+Career Readiness / Skill Gap / Next Action
+
+Skill Intelligence evaluates and maintains the student's current skill state.
+
+Career Readiness Engine compares student skills against career requirements.
+
+Skill Gap Engine identifies missing or underdeveloped skills.
+
+Recommendation Engine ranks courses using the weighted recommendation factors.
+
+Next Best Action Engine chooses the most valuable immediate action.
+
+Personalized Roadmap Engine creates a sequence from career requirements, dependencies, current skills, and missing skills.
+
+Assessment results update skill levels, which trigger readiness and recommendation recalculation.
+
+The AI Advisor must use structured student context and must not invent student facts.
+
+17. Core Workflows
+
+Dashboard
+
+Use one consolidated endpoint rather than many independent requests:
+
+GET /api/v1/dashboard/
+
+Expected dashboard payload includes: student, career readiness, target career, next action, skills, gaps, recommendations, learning progress, recent activity, and roadmap.
+
+Assessment Workflow
+
+Assessment is attempted by the student.
+
+Answers are evaluated and a score is generated.
+
+Skill-level results are calculated.
+
+StudentSkill is updated.
+
+Career readiness is recalculated.
+
+Recommendations are regenerated/updated.
+
+Roadmap Workflow
+
+Select target career.
+
+Load required career skills.
+
+Resolve skill dependencies/prerequisites.
+
+Compare with current student skills.
+
+Identify missing skills.
+
+Generate an ordered learning sequence.
+
+Learning Status Values
+
+SAVED
+
+IN_PROGRESS
+
+COMPLETED
+
+DROPPED
+
+Analytics Event Examples
+
+login
+
+course_started
+
+course_completed
+
+assessment
+
+skill_updated
+
+career_changed
+
+recommendation_viewed
+
+recommendation_accepted
+
+roadmap_node_completed
+
+ai_question_asked
+
+18. High-Level ER Relationship Map
+
+The following diagram is a clean logical map of the major entities and their relationships. It is intended as an architectural overview; the table definitions above remain the source of truth.
+
+┌──────────────┐       ┌──────────────────┐│    USERS     │──────▶│ STUDENT_PROFILES │└──────┬───────┘       └───────┬──────────┘       │                       │       │                ┌──────┴──────┐       │                ▼             ▼       │            STUDENT_SKILLS  INTERESTS       │                │       │                ▼       │          SKILL PREREQUISITES       │       └──────────────┐                      ▼             STUDENT CAREER GOALS                      │                      ▼                  CAREERS                      │                      ▼          CAREER SKILL REQUIREMENTS                      │              ┌───────┴────────┐              ▼                ▼       RECOMMENDATIONS       ROADMAPS              │                │              ▼                ▼           COURSES        ROADMAP NODES              │              ▼       STUDENT COURSES              │              ▼        LEARNING ACTIVITYASSESSMENTS ──▶ ATTEMPTS ──▶ ANSWERS       │                       │       ▼                       ▼ SKILL RESULTS ───────────▶ STUDENT SKILLSSTUDENT ──▶ AI CONVERSATIONS ──▶ AI MESSAGESSTUDENT ──▶ NOTIFICATIONSSTUDENT ──▶ NEXT BEST ACTIONSSTUDENT ──▶ ANALYTICS EVENTS
+
+19. Indexes & Performance Recommendations
+
+Index users.email.
+
+Index student foreign keys and commonly filtered student-owned records.
+
+Index student_skills by (student_id, skill_id).
+
+Index career_skill_requirements by (career_id, skill_id).
+
+Index course_skills and course_prerequisites foreign keys.
+
+Index recommendations by student, match score, and generated_at.
+
+Index learning records by student, status, and timestamp.
+
+Index analytics by student, event_type, and created_at.
+
+Use Redis caching for expensive/repeated intelligence calculations where appropriate.
+
+Use Celery for background recommendation generation, readiness recalculation, notifications, analytics aggregation, and other non-blocking jobs.
+
+Prefer a single dashboard endpoint to reduce frontend request overhead.
+
+20. Data Constraints & Validation
+
+proficiency: 0–100.
+
+confidence: 0–100.
+
+rating: 0–5.
+
+progress: 0–100.
+
+match score: 0–100.
+
+required level: 0–100.
+
+CGPA: 0–10.
+
+Use unique constraints for relationship tables to prevent duplicate mappings.
+
+Validate dates and status transitions at the application and database layers where practical.
+
+Protect master data from accidental deletion.
+
+21. Production-Grade Improvements Identified
+
+#
+
+Production Recommendation
+
+1. Django User Model
+
+Use a custom Django User model with email as login. Django normally manages password hashing rather than storing a manually managed application-level password_hash field.
+
+2. Roles & Permissions
+
+Consider Django Groups/Permissions instead of a custom user_roles table unless domain-specific role metadata is required.
+
+3. Student University Redundancy
+
+student_profiles contains university_id while college already points to university. Prefer removing the redundancy unless it is intentionally denormalized for performance and consistency is enforced.
+
+4. Academic History
+
+Add student_academic_records / semester-wise performance tables if historical SGPA, marks, and academic progress are required.
+
+5. Subject-Level Analytics
+
+Add student_subject_performance if the system needs subject-level analytics.
+
+6. Career Classification
+
+Consider career_interests or career-category relations if career discovery needs structured interest mapping.
+
+7. Course–Career Mapping
+
+Consider course_careers if a course directly prepares multiple careers; otherwise derive the relationship through skills.
+
+8. Internal Course Content
+
+Add course_modules / course_lessons only if IntelliCourse will host and track internal content. For external course links, the current courses table is sufficient.
+
+9. Assessment Skill Weights
+
+Add assessment_skill_weights if skill contribution needs weighting beyond question marks.
+
+10. Recommendation Feedback
+
+Add recommendation_feedback for responses such as not interested, already know this, or too difficult; this can improve ranking.
+
+11. Career Readiness History
+
+Add career_readiness_snapshots to persist readiness over time and power improvement/trend charts.
+
+12. Skill Gap History
+
+Add skill_gap_snapshots if historical skill-gap evolution must be visualized or analyzed.
+
+13. Profile Completion
+
+Prefer deriving profile completion dynamically instead of storing redundant completion percentages.
+
+14. Admin Audit Fields
+
+Consider created_by and updated_by on admin-managed master data.
+
+15. Soft Delete / Archive
+
+Use archive/soft-delete fields on content tables when historical references must remain intact.
+
+16. Roadmap Dependencies
+
+Add roadmap_node_dependencies if roadmap nodes need arbitrary dependencies beyond skill prerequisites.
+
+17. Action History
+
+Add student_action_history if every generated/completed/dismissed action must be auditable.
+
+18. AI Observability
+
+Consider storing model, prompt_version, response latency, token usage, and safety flags for AI cost/version monitoring. Avoid storing sensitive prompts unnecessarily.
+
+22. Security Requirements
+
+Password hashing must be handled securely using Django's authentication system.
+
+Use JWT access and refresh tokens where JWT authentication is selected.
+
+Apply role-based permissions.
+
+Enforce student data isolation so a student cannot access another student's records.
+
+Use HTTPS in deployed environments.
+
+Configure CORS and CSRF appropriately for the deployment architecture.
+
+Apply API rate limiting, input validation, and authorization checks.
+
+Store secrets and credentials in secure environment variables/secrets management.
+
+Run production with DEBUG=False.
+
+Protect AI context and student data from unnecessary exposure.
+
+23. Recommended Django Application Mapping
+
+Django App
+
+Primary Responsibility
+
+accounts
+
+Users, authentication, roles/permissions
+
+students
+
+Student profile, interests, career goals, academic state
+
+academics
+
+Universities, colleges, branches, regulations, years, semesters, subjects
+
+skills
+
+Skill catalog, prerequisites, student skill state/history
+
+careers
+
+Career catalog and career skill requirements
+
+courses
+
+Providers, categories, courses, course skills/prerequisites
+
+recommendations
+
+Recommendation generation, scoring, reasons, feedback
+
+assessments
+
+Assessments, questions, options, attempts, answers, results
+
+learning
+
+Student course enrollment/progress and learning activity
+
+roadmap
+
+Personalized roadmaps and nodes
+
+notifications
+
+Notifications and preferences
+
+analytics
+
+Events and reporting
+
+ai_advisor
+
+Conversations, messages, AI orchestration
+
+common
+
+Shared utilities, base models, enums, permissions, helpers
+
+24. Technology & Deployment Reference
+
+Backend: Django + Django REST Framework.
+
+Database: PostgreSQL.
+
+Authentication: JWT access/refresh.
+
+Async processing: Celery.
+
+Cache/message broker: Redis.
+
+API documentation: OpenAPI / Swagger.
+
+Application server: Gunicorn.
+
+Reverse proxy: Nginx.
+
+Containerization: Docker.
+
+Use migrations as the controlled mechanism for schema changes.
+
+25. Implementation Order
+
+Create Django project and environment configuration.
+
+Create custom User/authentication foundation.
+
+Create academic master data.
+
+Create student profile and academic records.
+
+Create skill catalog and student skill intelligence.
+
+Create career catalog and career requirements.
+
+Create course catalog and skill mappings.
+
+Implement assessment system and skill updates.
+
+Implement recommendation engine and reasons.
+
+Implement career readiness and skill gap calculations.
+
+Implement personalized roadmap generation.
+
+Implement Next Best Action engine.
+
+Implement learning tracking.
+
+Implement dashboard aggregation endpoint.
+
+Implement AI Advisor using structured context.
+
+Implement notifications and preferences.
+
+Implement analytics events and reporting.
+
+Add indexes, constraints, caching, background jobs, security controls, tests, and deployment.
+
+26. Final Schema Checklist
+
+47 core tables from the supplied schema are documented.
+
+Authentication, academic master data, students, skills, careers, courses, recommendations, assessments, learning, roadmap, Next Best Action, AI Advisor, notifications, and analytics are covered.
+
+Primary keys, foreign keys, important uniqueness constraints, nullable fields, scoring/proficiency ranges, and status values are recorded.
+
+Recommendation weights are documented.
+
+Dashboard, assessment, roadmap, learning, analytics, and AI workflows are documented.
+
+Performance/index recommendations are documented.
+
+Security requirements are documented.
+
+Production-grade schema improvements are explicitly separated from the original core schema so they are not silently mixed into the baseline.
+
+The ER map is included as a clean high-level architectural reference.
+
+27. Important Implementation Note
+
+The 47-table schema is the baseline logical model. The production-grade improvements listed in Section 21 are recommendations, not silent modifications to that baseline. Before generating Django migrations, PostgreSQL CREATE TABLE scripts, or the final ERD, the project team should decide which improvements are in scope.

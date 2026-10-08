@@ -1,0 +1,1077 @@
+INTELLIGENT COURSERECOMMENDATION SYSTEM
+
+Complete System Architecture & Technical Blueprint
+
+Designed from a 30-year system architecture perspectiveFor B.Tech / Engineering Student Final-Year Project
+
+Document Scope
+
+Technology / Design
+
+Architecture
+
+Modular full-stack intelligent platform
+
+Backend
+
+Python + Django + Django REST Framework
+
+Database
+
+SQLite for development/academic portability; PostgreSQL-ready
+
+ML
+
+TF-IDF + Cosine Similarity + Multi-Factor Hybrid Scoring
+
+Frontend
+
+SPA using HTML + CSS + Vanilla JavaScript, Chart.js, Lucide
+
+AI
+
+Optional Gemini layer for natural-language explanations
+
+Target
+
+Engineering students; initially Andhra Pradesh; scalable nationwide
+
+1. Architectural Vision
+
+The Intelligent Course Recommendation System should not be treated as a simple CRUD application. It should be designed as a modular academic intelligence platform where academic data, student profiles, skills, careers, courses, assessments, learning activity, analytics, and recommendation intelligence are separate but connected domains.
+
+                         ┌──────────────────────────┐                         │       STUDENT / ADMIN    │                         │       Web Browser        │                         └────────────┬─────────────┘                                      │ HTTPS                                      ▼                         ┌──────────────────────────┐                         │     FRONTEND / SPA       │                         │ HTML + CSS + JavaScript  │                         │ Chart.js + Lucide        │                         └────────────┬─────────────┘                                      │ REST / JSON                                      ▼┌─────────────────────────────────────────────────────────────────────┐│                         DJANGO APPLICATION                          ││                                                                     ││ Accounts   Academics   Students   Skills   Careers   Courses       ││ Assessments   Recommendations   Learning   Analytics               ││                                                                     ││                 Recommendation Intelligence Layer                   │└───────────────────────────────┬─────────────────────────────────────┘                                │                 ┌──────────────┼──────────────┐                 ▼              ▼              ▼          ┌────────────┐ ┌────────────┐ ┌──────────────┐          │ SQLite /   │ │ ML Engine  │ │ Gemini AI    │          │ PostgreSQL │ │ TF-IDF     │ │ Optional     │          └────────────┘ │ Scoring    │ └──────────────┘                         └────────────┘
+
+1.1 Architectural Principles
+
+Database is the source of truth: academic information, courses, skills, careers, and student data should come from the database.
+
+Recommendation engine is independent: recommendation calculations must not be embedded directly in Django views.
+
+Explainability is mandatory: every recommendation should answer why the course was recommended.
+
+AI should enhance, not control: an LLM may generate natural-language explanations, but the deterministic engine remains authoritative.
+
+Academic data must be versioned because curricula and regulations change.
+
+Academic records should support fields such as: regulation, academic_year, source_url, effective_from, effective_to, version, and verified_at.
+
+2. Major System Modules
+
+1. Identity & Access2. Academic Intelligence3. Student Profile4. Skill Intelligence5. Career Intelligence6. Course Catalog7. Assessment Engine8. Recommendation Engine9. Learning Management10. Analytics & Administration
+
+3. Module 1 — Identity & Access
+
+Purpose: authentication, authorization, identity management, and secure access.
+
+User
+
+Role
+
+Permission
+
+Authentication
+
+JWT
+
+Session
+
+Roles:
+
+STUDENT
+
+FACULTY
+
+ADMIN
+
+Registration
+
+Login
+
+Logout
+
+JWT access token
+
+Refresh token
+
+Password hashing
+
+Profile access
+
+Role-based permissions
+
+4. Module 2 — Academic Intelligence
+
+This is one of the most important parts of the platform. The academic hierarchy is:
+
+University    ↓College    ↓Program    ↓Branch    ↓Regulation    ↓Curriculum    ↓Semester    ↓Subject
+
+Example:
+
+JNTUA → College → B.Tech → Computer Science & Engineering → R23→ CSE Curriculum → Semester 4 → DBMS
+
+University
+
+College
+
+Program
+
+Branch
+
+Regulation
+
+Curriculum
+
+Semester
+
+Subject
+
+CurriculumSubject
+
+CurriculumSubject is important because the same subject may appear differently across universities, branches, regulations, and semesters. It prevents unnecessary duplication.
+
+4.1 Academic Data Architecture
+
+University    │    ├──── College    │    └──── Program             │             └──── Branch                    │                    └──── Curriculum                           │                           ├──── Regulation                           │                           └──── Semester                                  │                                  └──── CurriculumSubject                                         │                                         └──── Subject
+
+5. Module 3 — Student Intelligence
+
+The student profile contains static academic information and dynamic learning information.
+
+Field
+
+Purpose
+
+id
+
+Student identifier
+
+user
+
+Authentication user
+
+college
+
+Student college
+
+university
+
+Associated university
+
+program
+
+B.Tech / program
+
+branch
+
+Engineering branch
+
+regulation
+
+Applicable regulation
+
+curriculum
+
+Applicable curriculum
+
+admission_year
+
+Admission year
+
+current_year
+
+Current academic year
+
+current_semester
+
+Current semester
+
+cgpa
+
+Academic performance
+
+weekly_learning_hours
+
+Learning capacity
+
+preferred_difficulty
+
+Preferred course difficulty
+
+learning_mode
+
+Learning preference
+
+onboarding_completed
+
+Onboarding status
+
+created_at / updated_at
+
+Audit timestamps
+
+5.1 Student Skill Architecture
+
+Student   │   └── StudentSkill          │          └── Skill
+
+Do not store a comma-separated string such as “Python, Java, SQL”. Use normalized StudentSkill records.
+
+StudentSkill field
+
+Purpose
+
+student
+
+Student reference
+
+skill
+
+Skill reference
+
+proficiency
+
+0 Unknown, 1 Beginner, 2 Elementary, 3 Intermediate, 4 Advanced, 5 Expert
+
+confidence
+
+Confidence in the skill estimate
+
+source
+
+Self-reported / assessment / learning activity
+
+last_assessed_at
+
+Last skill assessment timestamp
+
+6. Module 4 — Skill Intelligence
+
+Skill
+
+SkillCategory
+
+SkillPrerequisite
+
+Python └── ProgrammingSQL └── DatabaseMachine Learning └── Artificial IntelligenceDocker └── DevOps
+
+Skill prerequisite example:
+
+Python → Machine Learning → Deep Learning
+
+Skill prerequisites are useful for both recommendation ranking and roadmap generation.
+
+7. Module 5 — Career Intelligence
+
+Career
+
+CareerSkill
+
+CareerInterest
+
+CareerBranch
+
+AI Engineer     │     ├── Python     ├── Mathematics     ├── Statistics     ├── Machine Learning     ├── Deep Learning     └── Generative AI
+
+CareerSkill field
+
+Purpose
+
+career
+
+Career reference
+
+skill
+
+Required skill
+
+required_level
+
+Expected proficiency
+
+importance
+
+Importance weight
+
+required
+
+Whether mandatory
+
+7.1 Career Readiness Engine
+
+Current Student Skills           ↓Required Career Skills           ↓Compare proficiency           ↓Calculate gaps           ↓Career Readiness %
+
+AI EngineerPython             █████████░ 90%Statistics         █████░░░░░ 50%Machine Learning   ████░░░░░░ 40%Deep Learning      ██░░░░░░░░ 20%Overall Readiness = 61%
+
+8. Module 6 — Course Intelligence
+
+Provider    ↓Category    ↓Course
+
+CourseProvider
+
+CourseCategory
+
+Course
+
+CourseSkill
+
+CourseCareer
+
+CourseInterest
+
+CourseBranch
+
+CoursePrerequisite
+
+Course field
+
+Purpose
+
+id
+
+Course identifier
+
+provider
+
+Learning provider
+
+title / slug
+
+Course name and URL-safe identifier
+
+description
+
+Course content
+
+url
+
+Course URL
+
+difficulty
+
+Difficulty level
+
+duration_hours
+
+Estimated duration
+
+language
+
+Course language
+
+cost_type
+
+Free / paid / other
+
+certificate_available
+
+Certificate indicator
+
+rating / rating_count
+
+Optional rating metadata
+
+active
+
+Availability status
+
+source_type
+
+Source classification
+
+source_url
+
+Verification/source URL
+
+last_verified_at
+
+Verification date
+
+created_at / updated_at
+
+Audit timestamps
+
+8.1 Course Skill Relationship
+
+Machine Learning CourseTaught:    Python    Statistics    Machine Learning    NumPy    PandasRequires:    Python    Mathematics    Statistics
+
+CourseSkill should contain course, skill, relationship_type, and importance.
+
+8.2 Course Prerequisite Architecture
+
+Data Structures       ↓AlgorithmsPython       ↓Machine Learning
+
+Support course prerequisites through CoursePrerequisite and skill requirements through CourseSkill.
+
+9. Module 7 — Assessment Engine
+
+Assessment    ↓Question    ↓Option    ↓AssessmentAttempt    ↓StudentAnswer    ↓Scoring Engine    ↓Skill Update
+
+Example feedback loop:
+
+Python Assessment       ↓Score = 82%       ↓Python proficiencyBeginner → Intermediate       ↓Recommendation Engine       ↓Recommendations recalculated
+
+10. Module 8 — Recommendation Intelligence
+
+This is the heart of the project.
+
+Student Profile      ↓Candidate Generator      ↓Candidate Filtering      ↓Feature Builder      ↓TF-IDF      ↓Cosine Similarity      ↓Multi-Factor Scoring      ↓Prerequisite Analysis      ↓Ranking      ↓Explanation Generator      ↓Recommendation Results
+
+10.1 Recommendation Engine Components
+
+recommendations/    engine/        candidate_filter.py        feature_builder.py        similarity.py        scoring.py        prerequisites.py        ranking.py        explanations.py        recommender.py        config.py    models.py    serializers.py    views.py    urls.py    services.py
+
+10.2 Candidate Generation
+
+Student:CSESemester 4AI EngineerAI InterestPython IntermediateCandidate pool:PythonStatisticsMachine LearningData ScienceDeep LearningAINLPComputer Vision
+
+10.3 TF-IDF Layer
+
+Student profile text:CSEArtificial IntelligenceMachine LearningAI EngineerPythonStatisticsData ScienceCourse text:Machine LearningPythonStatisticsSupervised LearningRegressionClassificationAIData ScienceTF-IDF(student)        ↓TF-IDF(course)        ↓Cosine Similarity
+
+Example content similarity: 0.86
+
+10.4 Multi-Factor Scoring
+
+Factor
+
+Weight
+
+Career Match
+
+25%
+
+Interest Match
+
+20%
+
+Skill Relevance
+
+20%
+
+Content Similarity
+
+15%
+
+Branch Match
+
+10%
+
+Semester Match
+
+5%
+
+Difficulty Match
+
+5%
+
+Score =    0.25 Career  + 0.20 Interest  + 0.20 Skill  + 0.15 Content  + 0.10 Branch  + 0.05 Semester  + 0.05 DifficultyFinal Score      ↓Prerequisite Penalty      ↓Normalize 0–100
+
+10.5 Example Recommendation Calculation
+
+Factor
+
+Value
+
+Career
+
+1.00
+
+Interest
+
+0.90
+
+Skill
+
+0.85
+
+Similarity
+
+0.88
+
+Branch
+
+1.00
+
+Semester
+
+0.90
+
+Difficulty
+
+0.80
+
+Calculated score
+
+91.2%
+
+(1.00 × .25)+ (.90 × .20)+ (.85 × .20)+ (.88 × .15)+ (1.00 × .10)+ (.90 × .05)+ (.80 × .05)= 91.2%
+
+10.6 Prerequisite Intelligence
+
+Machine Learningrequires:PythonStatisticsStudent:Python = IntermediateStatistics = Beginner
+
+Machine Learning91% Match✓ Python prerequisite satisfied⚠ Statistics foundation recommendedSuggested preparation:Statistics Fundamentals
+
+10.7 Explainable Recommendation
+
+{    "career_match": 0.92,    "interest_match": 0.90,    "skill_match": 0.85,    "content_similarity": 0.88,    "branch_match": 1.0,    "semester_match": 0.9,    "difficulty_match": 0.8,    "missing_prerequisites": [        "Statistics"    ]}
+
+The structured evidence is the foundation for trustworthy explanations.
+
+10.8 Gemini / LLM Architecture
+
+Recommendation Engine        ↓Structured Evidence        ↓Gemini        ↓Natural Language Explanation
+
+Do not use the architecture “Student → Gemini → random course recommendation”. The deterministic recommendation engine remains authoritative.
+
+10.9 Recommendation Storage
+
+Recommendation field
+
+Purpose
+
+student / course
+
+Recommendation relationship
+
+rank
+
+Ranking position
+
+final_score
+
+Overall score
+
+career_score
+
+Career component
+
+interest_score
+
+Interest component
+
+skill_score
+
+Skill component
+
+similarity_score
+
+TF-IDF component
+
+branch_score
+
+Branch component
+
+semester_score
+
+Semester component
+
+difficulty_score
+
+Difficulty component
+
+prerequisite_penalty
+
+Penalty amount
+
+explanation_json
+
+Structured evidence
+
+algorithm_version
+
+Model/version tracking
+
+generated_at
+
+Generation timestamp
+
+10.10 Recommendation Feedback Loop
+
+Recommendation       ↓Student       ↓👍 / 👎       ↓Feedback       ↓Analytics       ↓Future Model Improvement
+
+11. Module 9 — Learning Management
+
+Enrollment
+
+Bookmark
+
+LearningActivity
+
+CourseCompletion
+
+Recommendation      ↓View Course      ↓Bookmark      ↓Start      ↓Enroll      ↓Progress      ↓Complete      ↓Update Student Skills
+
+11.1 Closed-Loop Intelligence
+
+Student   ↓Recommendation   ↓Course   ↓Learning   ↓Assessment   ↓Skill Improvement   ↓Updated Student Profile   ↓New Recommendation
+
+12. Module 10 — Analytics & Administration
+
+12.1 Student Analytics
+
+Career Readiness
+
+Skill Growth
+
+Course Completion
+
+Learning Hours
+
+Recommendation Accuracy
+
+Assessment Performance
+
+12.2 Admin Analytics
+
+Total Students
+
+Students by College
+
+Students by Branch
+
+Popular Careers
+
+Popular Skills
+
+Popular Courses
+
+Most Recommended Courses
+
+Most Completed Courses
+
+Assessment Performance
+
+Recommendation Feedback
+
+13. Complete Database Architecture
+
+Domain
+
+Tables
+
+Authentication
+
+User, Role, Permission
+
+Academics
+
+University, College, Program, Branch, Regulation, Curriculum, Semester, Subject, CurriculumSubject
+
+Student
+
+StudentProfile, StudentSkill, StudentInterest, StudentCareerGoal
+
+Skills
+
+Skill, SkillCategory, SkillPrerequisite
+
+Careers
+
+Career, CareerSkill, CareerInterest, CareerBranch
+
+Courses
+
+CourseProvider, CourseCategory, Course, CourseSkill, CourseCareer, CourseInterest, CourseBranch, CoursePrerequisite
+
+Assessment
+
+Assessment, Question, Option, AssessmentAttempt, StudentAnswer
+
+Recommendation
+
+Recommendation, RecommendationFeedback
+
+Learning
+
+Enrollment, Bookmark, LearningActivity
+
+Analytics
+
+RecommendationEvent, AuditLog
+
+13.1 Conceptual ER Diagram
+
+                         ┌──────────────┐                         │  University  │                         └──────┬───────┘                                │                         ┌──────▼───────┐                         │   College    │                         └──────┬───────┘                                │                         ┌──────▼───────┐                         │   Program    │                         └──────┬───────┘                                │                         ┌──────▼───────┐                         │    Branch    │                         └──────┬───────┘                                │                         ┌──────▼───────┐                         │ Regulation   │                         └──────┬───────┘                                │                         ┌──────▼───────┐                         │  Curriculum  │                         └──────┬───────┘                                │                         ┌──────▼───────┐                         │   Semester   │                         └──────┬───────┘                                │                         ┌──────▼─────────┐                         │ Curriculum      │                         │ Subject         │                         └──────┬─────────┘                                │                         ┌──────▼───────┐                         │   Subject    │                         └──────────────┘┌──────────┐│   User   │└────┬─────┘     │┌────▼────────────┐│ StudentProfile  │└────┬────────────┘     ├───────────────┐     ▼               ▼StudentSkill   StudentInterest     │     ▼   Skill     │     ▼SkillPrerequisiteStudentProfile ─────────► Career                              │                              ▼                        CareerSkill                              │                              ▼                            SkillCourseProvider     │     ▼   Course   / │    /  │    ▼   ▼    ▼Skill Career Interest  │  ▼CoursePrerequisiteStudentProfile       │       ▼Recommendation       │       ▼     Course       │       ▼RecommendationFeedbackStudentProfile       │       ▼AssessmentAttempt       │       ▼StudentAnswer       │       ▼Assessment
+
+14. Backend Architecture
+
+Recommendation calculations should not live directly inside views. Use domain services and a dedicated engine.
+
+apps/├── accounts/├── academics/├── students/├── skills/├── careers/├── courses/├── assessments/├── recommendations/│   ├── engine/│   │   ├── candidate_filter.py│   │   ├── feature_builder.py│   │   ├── similarity.py│   │   ├── scoring.py│   │   ├── prerequisites.py│   │   ├── ranking.py│   │   ├── explanations.py│   │   └── recommender.py│   ├── models.py│   ├── serializers.py│   ├── views.py│   ├── urls.py│   └── services.py├── learning/├── analytics/└── ai_assistant/
+
+15. REST API Architecture
+
+Base path: /api/v1/
+
+Domain
+
+Endpoints
+
+Authentication
+
+POST /auth/register/; POST /auth/login/; POST /auth/logout/; POST /auth/token/refresh/; GET /auth/me/
+
+Academic
+
+GET /universities/; GET /universities/{id}/colleges/; GET /colleges/; GET /branches/; GET /regulations/; GET /curricula/; GET /curricula/{id}/subjects/
+
+Student
+
+GET /students/me/; PATCH /students/me/; GET/POST /students/me/skills/; GET/POST /students/me/interests/; GET/POST /students/me/career-goals/
+
+Recommendation
+
+GET /recommendations/; POST /recommendations/generate/; GET /recommendations/{id}/; GET /recommendations/{id}/explanation/; POST /recommendations/{id}/feedback/
+
+Career
+
+GET /careers/; GET /careers/{id}/; GET /careers/{id}/skills/; GET /careers/{id}/roadmap/
+
+Assessment
+
+GET /assessments/; POST /assessments/{id}/start/; POST /assessment-attempts/{id}/answer/; POST /assessment-attempts/{id}/submit/; GET /assessment-attempts/{id}/result/
+
+16. Frontend Architecture
+
+Use a modern responsive SPA with HTML, CSS, Vanilla JavaScript, Chart.js, and Lucide icons.
+
+LoginRegisterOnboardingDashboardRecommendationsCourse DetailsCareer ExplorerSkill GapLearning RoadmapAssessmentsAssessment ResultMy LearningBookmarksProfileAdmin Dashboard
+
+16.1 Student Journey
+
+REGISTER   ↓LOGIN   ↓ONBOARDING   ↓Academic Information   ↓Skills   ↓Interests   ↓Career Goal   ↓Assessment   ↓Career Readiness   ↓Recommendations   ↓Course   ↓Learning Roadmap   ↓Progress   ↓Completion   ↓Skill Update   ↓New Recommendations
+
+16.2 Dashboard
+
+┌──────────────────────────────────────────┐│ Welcome, Student                         ││ CSE • Semester 4 • AI Engineer           │└──────────────────────────────────────────┘┌────────────┐ ┌────────────┐ ┌────────────┐│ Readiness  │ │ Skills     │ │ Completed  ││    68%     │ │    12      │ │     4      │└────────────┘ └────────────┘ └────────────┘┌──────────────────────────────────────────┐│ Recommended For You                      ││ Machine Learning          92%             ││ Statistics               89%             ││ Data Science              87%             │└──────────────────────────────────────────┘┌─────────────────────┐│ Your Skill Gaps     ││ Statistics   ███░░  ││ ML           ████░  ││ Deep Learning ██░░░ │└─────────────────────┘
+
+16.3 Skill Gap Page
+
+Career: AI EngineerSkill                Current    Required    Gap------------------------------------------------Python                  3           4         1Statistics              1           3         2Machine Learning        2           4         2Deep Learning           0           3         3
+
+Recommended next steps:
+
+Statistics Fundamentals        ↓Machine Learning        ↓Deep Learning
+
+17. Roadmap Architecture
+
+Do not create a static roadmap image. Generate the roadmap dynamically.
+
+Skill Prerequisites        +Course Prerequisites        +Career Requirements        ↓Graph        ↓Topological Ordering        ↓Learning Roadmap
+
+Python   ↓Statistics   ↓Data Analysis   ↓Machine Learning   ↓Deep Learning   ↓Generative AI
+
+18. Data Pipeline & Dataset Architecture
+
+Official Sources      ↓Research      ↓Data Extraction      ↓Validation      ↓Normalization      ↓CSV/JSON      ↓Django Seeder      ↓Database
+
+Every real academic record should ideally have source_url, source_type, and verified_at.
+
+18.1 Dataset Structure
+
+datasets/universities.csvcolleges.csvprograms.csvbranches.csvregulations.csvcurricula.csvsemesters.csvsubjects.csvcurriculum_subjects.csvskills.csvskill_prerequisites.csvinterests.csvcareers.csvcareer_skills.csvcareer_interests.csvcareer_branches.csvproviders.csvcategories.csvcourses.csvcourse_skills.csvcourse_careers.csvcourse_interests.csvcourse_branches.csvcourse_prerequisites.csvassessments.csvquestions.csvoptions.csv
+
+19. Machine Learning Architecture
+
+Do not start with deep learning. For a final-year engineering project, the initial recommendation architecture should be:
+
+Content-Based+Knowledge-Based+Rule-Based=Hybrid Recommendationusing:TF-IDF+Cosine Similarity+Weighted Scoring+Prerequisite Graph
+
+Understandable
+
+Explainable
+
+Implementable
+
+Testable
+
+Suitable for a relatively small dataset
+
+19.1 Future ML Architecture
+
+                 Recommendation Platform                          │             ┌────────────┼────────────┐             ▼            ▼            ▼       Content-Based  Knowledge    Collaborative          TF-IDF       Based         Filtering             │            │            │             └────────────┼────────────┘                          ▼                   Hybrid Ranker                          │                          ▼                  Learning-to-Rank
+
+20. Caching & Performance Architecture
+
+Student Request      ↓Recommendation Cache?   /           YES           NO  ↓             ↓Return       Calculate                ↓             Store                ↓             Return
+
+Cache should track student, algorithm_version, generated_at, and recommendation results.
+
+Regenerate when important student data changes: career, skills, interests, semester, assessment completion, or course completion.
+
+20.1 Database Performance
+
+Use select_related() and prefetch_related().
+
+Index student_id, course_id, skill_id, career_id, branch_id, semester, and regulation_id.
+
+Avoid N+1 queries.
+
+Keep frequently used course metadata locally instead of repeatedly calling external services.
+
+21. Security Architecture
+
+Browser   ↓ HTTPSJWT Authentication   ↓Permission Layer   ↓Serializer Validation   ↓Service Layer   ↓Django ORM   ↓Database
+
+Never connect the frontend directly to the database.
+
+Never expose SECRET_KEY, GEMINI_API_KEY, database credentials, or JWT secrets.
+
+Store secrets in environment variables.
+
+Use Django password hashing and role-based permissions.
+
+Validate and authorize every protected API endpoint.
+
+22. Observability & Auditability
+
+Application Logs
+
+API Logs
+
+Recommendation Logs
+
+Assessment Logs
+
+Audit Logs
+
+Error Logs
+
+Track recommendation generation time, number of candidates, final recommendations, feedback, and assessment completion.
+
+23. Complete Project Folder Structure
+
+intelligent-course-recommender/│├── manage.py├── requirements.txt├── .env├── .env.example├── .gitignore├── README.md│├── config/│├── apps/│   ├── accounts/│   ├── academics/│   ├── students/│   ├── skills/│   ├── careers/│   ├── courses/│   ├── assessments/│   ├── recommendations/│   ├── learning/│   ├── analytics/│   └── ai_assistant/│├── ml/│   ├── models/│   ├── vectorizers/│   ├── pipelines/│   └── artifacts/│├── datasets/│├── templates/│├── static/│   ├── css/│   ├── js/│   ├── images/│   └── icons/│├── docs/│   ├── architecture.md│   ├── database.md│   ├── api.md│   ├── ml_algorithm.md│   └── deployment.md│└── tests/
+
+24. Deployment Architecture
+
+24.1 Development
+
+Browser   ↓Django   ↓SQLite
+
+24.2 Production-Ready
+
+                    Internet                       │                     HTTPS                       │                ┌──────▼──────┐                │ Nginx / CDN │                └──────┬──────┘                       │                ┌──────▼────────────┐                │ Django / Gunicorn │                └──────┬────────────┘                       │             ┌─────────┼─────────┐             ▼         ▼         ▼        PostgreSQL   ML Engine  Gemini
+
+25. Recommended Development Order
+
+Database architecture
+
+Academic dataset
+
+Student model
+
+Skill / Career / Course models
+
+Assessment system
+
+Recommendation engine
+
+REST APIs
+
+Dashboard
+
+Roadmap
+
+Analytics
+
+AI explanation
+
+Testing
+
+Do not start with the UI. A beautiful UI around a weak recommendation engine is still a weak project.
+
+26. Testing & Verification Strategy
+
+26.1 Backend Tests
+
+Recommendation engine scoring tests
+
+Prerequisite penalty logic tests
+
+Assessment scoring tests
+
+Skill proficiency update tests
+
+REST API authentication tests
+
+REST API authorization and data-filter tests
+
+Model validation tests
+
+26.2 Manual Scenario
+
+Create a 4th-semester CSE student targeting AI Engineer.
+
+Complete onboarding with academic details, skills, interests, and career goal.
+
+Verify that relevant courses receive strong match scores and explanations.
+
+Verify prerequisite warnings, such as recommending Statistics before advanced Machine Learning where appropriate.
+
+Take a Python assessment and verify that proficiency changes based on the configured scoring rule.
+
+Verify that recommendations are recalculated after important profile changes.
+
+Test skill-gap and roadmap generation.
+
+Submit recommendation feedback and verify logging.
+
+Login as Admin and verify academic, course, student, assessment, and recommendation analytics.
+
+27. Data Governance & Quality
+
+Data class
+
+Meaning
+
+Use
+
+VERIFIED_OFFICIAL
+
+Official university/government source
+
+Preferred for academic facts
+
+SECONDARY_SOURCE
+
+Reputable secondary source
+
+Use with source metadata and verification
+
+DEMONSTRATION_DATA
+
+Synthetic/example data
+
+Use only where clearly labeled
+
+Academic facts should be verified against official sources before being presented as authoritative.
+
+28. Final System Architecture
+
+                    ┌─────────────────────┐                    │      STUDENT        │                    └──────────┬──────────┘                               │                    Academic Profile                               │                    Skills / Interests                               │                     Career Objective                               │                       Assessments                               │                               ▼                    ┌───────────────────┐                    │ STUDENT INTELLIGENCE│                    └─────────┬─────────┘                              │              ┌───────────────┼────────────────┐              ▼               ▼                ▼        Skill Engine    Career Engine     Academic Engine              │               │                │              └───────────────┼────────────────┘                              ▼                    ┌───────────────────┐                    │ COURSE CATALOG    │                    └─────────┬─────────┘                              │                              ▼                    Candidate Generation                              │                              ▼                         TF-IDF                              │                              ▼                    Cosine Similarity                              │                              ▼                    Multi-Factor Scoring                              │                              ▼                    Prerequisite Analysis                              │                              ▼                         Ranking                              │                              ▼                    Explainable AI Layer                              │                              ▼                    ┌───────────────────┐                    │ RECOMMENDATIONS   │                    └─────────┬─────────┘                              │                    ┌─────────┼─────────┐                    ▼         ▼         ▼                 Courses   Roadmap   Skill Gaps                    │                    ▼                 Learning                    │                    ▼               Assessments                    │                    ▼             Skill Improvement                    │                    └──────────────┐                                   │                                   ▼                         UPDATED PROFILE                                   │                                   ▼                         NEW RECOMMENDATIONS
+
+29. Architectural Verdict
+
+For an engineering final-year project, this architecture demonstrates four major areas: Full Stack (Django + DRF + SPA), Database Engineering (normalized academic/course/student schema), Machine Learning (TF-IDF + cosine similarity + hybrid scoring), and Intelligent Systems (skill gaps + prerequisites + career matching + adaptive recommendations + explainability).
+
+The strongest differentiator is the closed feedback loop: Student → Assessment → Skill Update → Recommendation → Learning → Completion → Skill Update → New Recommendation.
+
+30. Core Technology Stack
+
+Layer
+
+Recommended technology
+
+Language
+
+Python
+
+Backend framework
+
+Django
+
+API
+
+Django REST Framework
+
+Authentication
+
+JWT / SimpleJWT
+
+Database
+
+SQLite initially; PostgreSQL-ready
+
+ML
+
+scikit-learn
+
+Data processing
+
+pandas + numpy
+
+NLP feature
+
+TF-IDF
+
+Similarity
+
+Cosine Similarity
+
+Frontend
+
+HTML + CSS + Vanilla JavaScript SPA
+
+Charts
+
+Chart.js
+
+Icons
+
+Lucide
+
+Optional LLM
+
+Gemini API
+
+Web server
+
+Gunicorn
+
+Reverse proxy
+
+Nginx
+
+31. Architecture Completion Checklist
+
+✓ Modular domain architecture
+
+✓ Academic hierarchy
+
+✓ Student profile and skills
+
+✓ Career intelligence and readiness
+
+✓ Course catalog and relationships
+
+✓ Assessment and skill update pipeline
+
+✓ Hybrid recommendation engine
+
+✓ TF-IDF and cosine similarity
+
+✓ Weighted scoring model
+
+✓ Prerequisite analysis
+
+✓ Explainable recommendations
+
+✓ Optional Gemini explanation layer
+
+✓ Learning and completion loop
+
+✓ Feedback loop
+
+✓ Student and Admin analytics
+
+✓ REST API architecture
+
+✓ SPA page architecture
+
+✓ Dataset structure
+
+✓ Database/ER architecture
+
+✓ Caching and performance
+
+✓ Security
+
+✓ Observability
+
+✓ Testing strategy
+
+✓ Development and deployment architecture
+
+✓ Future ML extensibility

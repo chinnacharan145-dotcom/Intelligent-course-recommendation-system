@@ -1,0 +1,801 @@
+INTELLICOURSE AI
+
+Backend Development Plan
+
+Professional Backend Architecture, Database Design, Intelligence Services, API Strategy, Security, Testing & Development Roadmap
+
+Prepared from the complete supplied IntelliCourse AI backend specification
+
+Document Overview
+
+1. Backend Architecture
+
+2. Recommended Backend Technology Stack
+
+3. Django Project Architecture
+
+4. Core Database Design
+
+5. User & Authentication System
+
+6. Student Profile
+
+7. Academic Architecture
+
+8. Skills System
+
+9. Skill Assessment Architecture
+
+10. Career Database
+
+11. Career Skill Requirements
+
+12. Career Readiness Engine
+
+13. Readiness Calculation
+
+14. Course Architecture
+
+15. Course Recommendation Engine
+
+16. Recommendation Score
+
+17. Explainable Recommendations
+
+18. Next Best Action Engine
+
+19. Roadmap Engine
+
+20. Assessments Backend
+
+21. Learning Module
+
+22. Dashboard API
+
+23. API Architecture
+
+24. AI Advisor Backend
+
+25. AI Advisor API
+
+26. Notifications
+
+27. Analytics Backend
+
+28. Caching
+
+29. Background Processing
+
+30. Security Architecture
+
+31. Admin Backend
+
+32. Recommendation Architecture
+
+33. Database Relationship Overview
+
+34. Backend Development Phases
+
+35. Testing Strategy
+
+36. Most Important Backend Workflow
+
+37. What I Would Build First
+
+38. Final Backend Structure
+
+IntelliCourse AI — Backend Development Plan
+
+1. Backend Architecture
+
+I recommend this architecture:
+
+                    ┌──────────────────────────┐                    │      IntelliCourse AI    │                    │       Frontend SPA       │                    │ HTML / CSS / Vanilla JS  │                    └────────────┬─────────────┘                                 │                                 │ HTTPS / JSON                                 ▼                    ┌──────────────────────────┐                    │       Django API         │                    │        Backend           │                    └────────────┬─────────────┘                                 │             ┌───────────────────┼───────────────────┐             │                   │                   │             ▼                   ▼                   ▼       Authentication       Core Services       AI Services       & Authorization      & Business Logic     & Recommendation             │                   │                   │             │                   │                   │             ▼                   ▼                   ▼       JWT / Users          Student Profile      Recommendation       Permissions          Skills               Engine                            Careers              AI Advisor                            Courses               Explanation                            Assessments                            Learning                                 │                                 ▼                    ┌──────────────────────────┐                    │       PostgreSQL         │                    │        Database          │                    └──────────────────────────┘
+
+Your frontend specification already calls for:
+
+**Django → REST API → Vanilla JavaScript SPA → UI system**, so I would keep that architecture rather than introducing React unnecessarily.
+
+2. Recommended Backend Technology Stack
+
+Core
+
+| LayerTechnology    |                                               | | ------------------ | --------------------------------------------- | | Language           | Python                                        | | Backend            | Django                                        | | API                | Django REST Framework                         | | Database           | PostgreSQL                                    | | Authentication     | JWT                                           | | API Documentation  | OpenAPI / Swagger                             | | Background Jobs    | Celery                                        | | Message Broker     | Redis                                         | | Cache              | Redis                                         | | File Storage       | Local initially / S3-compatible storage later | | Deployment         | Docker + Linux                                | | Web Server         | Nginx                                         | | Application Server | Gunicorn                                      | | Testing            | Pytest / Django Test Framework                |
+
+AI layer
+
+Django   │   ├── Recommendation Engine   ├── Skill Gap Engine   ├── Career Readiness Engine   ├── Next Best Action Engine   └── AI Advisor
+
+Don't make the entire application dependent on an LLM.
+
+The **core recommendation and readiness calculations should remain deterministic and explainable**.
+
+3. Django Project Architecture
+
+I would divide the backend into domain-based applications.
+
+intellicourse/│├── manage.py│├── config/│   ├── settings/│   │   ├── base.py│   │   ├── development.py│   │   ├── production.py│   │   └── testing.py│   ││   ├── urls.py│   ├── asgi.py│   └── wsgi.py│├── apps/││   ├── accounts/│   ├── students/│   ├── academics/│   ├── skills/│   ├── careers/│   ├── courses/│   ├── assessments/│   ├── learning/│   ├── recommendations/│   ├── roadmap/│   ├── notifications/│   ├── analytics/│   └── ai_advisor/│├── common/│   ├── permissions/│   ├── pagination/│   ├── exceptions/│   ├── validators/│   ├── utils/│   └── constants/│├── tests/│├── requirements/│   ├── base.txt│   ├── development.txt│   └── production.txt│├── .env├── .env.example├── Dockerfile├── docker-compose.yml└── README.md
+
+This is much better than putting everything into one `models.py` and one `views.py`.
+
+4. Core Database Design
+
+This is the most important backend part.
+
+I would design the database around these major entities:
+
+User │ ▼Student Profile │ ├──────────────► Academic Profile │ ├──────────────► Skills │ ├──────────────► Interests │ ├──────────────► Career Goals │ ├──────────────► Assessments │ ├──────────────► Learning Activity │ └──────────────► Recommendations
+
+And separately:
+
+Career │ ├── Required Skills │ └── Career RoadmapSkill │ ├── Prerequisites │ └── Related SkillsCourse │ ├── Skills │ ├── Prerequisites │ └── Provider
+
+5. User & Authentication System
+
+User
+
+User----idemailpasswordfirst_namelast_nameis_activeis_staffcreated_atupdated_at
+
+Use Django's authentication system rather than creating an insecure custom password system.
+
+Authentication flow
+
+Register   ↓Email validation   ↓Password hashing   ↓Create User   ↓Create Student Profile   ↓Onboarding
+
+Login:
+
+Email + Password       ↓Authentication       ↓Access Token       ↓Refresh Token       ↓Frontend
+
+6. Student Profile
+
+The frontend describes the student as a **digital academic identity card** containing B.Tech/semester/career-readiness information and supporting information such as skills, interests, goals, learning statistics, achievements, and assessment history.
+
+Backend:
+
+StudentProfile--------------idusercollegeuniversitybranchregulationyearsemestercgpaweekly_study_hoursbioavatarcreated_atupdated_at
+
+7. Academic Architecture
+
+Create master tables rather than storing strings everywhere.
+
+UniversityCollegeBranchRegulationAcademicYearSemesterSubject
+
+Relationship:
+
+University    │    ▼College    │    ▼Branch    │    ▼Regulation    │    ▼Semester    │    ▼Subjects
+
+This becomes extremely useful later when recommendations depend on academic context.
+
+8. Skills System
+
+This is one of the most important modules.
+
+Skill
+
+Skill-----idnamedescriptioncategorydifficulty
+
+Examples:
+
+PythonSQLStatisticsMachine LearningDeep LearningDjangoJavaScriptReactCloudCybersecurity
+
+StudentSkill
+
+StudentSkill------------studentskillproficiencysourcelast_assessed
+
+Example:
+
+Python        90SQL           75Machine Learning 60Statistics    40Deep Learning 20
+
+Your frontend specifically uses skill levels and skill gaps in this manner.
+
+9. Skill Assessment Architecture
+
+A student's skill should not only come from self-declaration.
+
+Use three sources:
+
+Self Assessment       +Quiz Assessment       +Course Performance       ↓Skill Confidence Score
+
+For example:
+
+PythonSelf Assessment       80%Assessment Score      90%Course Performance    85%Final Skill Score     86%
+
+This makes your project significantly more intelligent.
+
+10. Career Database
+
+Career
+
+Career------idnamedescriptionindustry_demandsalary_rangedescription
+
+Example:
+
+AI EngineerData ScientistFull Stack DeveloperCloud EngineerCybersecurity Engineer
+
+These are directly aligned with the career exploration structure in your frontend plan.
+
+11. Career Skill Requirements
+
+Don't simply store:
+
+AI Engineer → Python
+
+Instead:
+
+CareerSkillRequirement----------------------careerskillrequired_levelimportance
+
+Example:
+
+AI EngineerPython             80    CriticalStatistics         70    CriticalMachine Learning   85    CriticalDeep Learning      70    HighCloud              60    Medium
+
+Now the backend can calculate:
+
+"How ready is this student for AI Engineering?"
+
+12. Career Readiness Engine
+
+This should be a dedicated backend service.
+
+Student Skills      +Career Requirements      ↓Compare      ↓Calculate gaps      ↓Calculate readiness
+
+Example:
+
+Student:Python           90Statistics       40ML               60Deep Learning    20Required:Python           80Statistics       70ML               85Deep Learning    70
+
+Backend identifies:
+
+Python          ✓Statistics      ⚠ML              ⚠Deep Learning   🔴
+
+Exactly the type of skill-gap visualization defined in your frontend specification.
+
+13. Readiness Calculation
+
+Start with a transparent algorithm.
+
+For example:
+
+Readiness =Σ(Student Skill / Required Skill × Weight)-------------------------------------------Σ(Weights)
+
+Then cap individual skill contributions appropriately.
+
+Example output:
+
+{  "career": "AI Engineer",  "readiness": 67,  "strengths": [    "Python"  ],  "gaps": [    "Statistics",    "Machine Learning",    "Deep Learning"  ]}
+
+Later you can improve the algorithm using historical assessment data.
+
+14. Course Architecture
+
+Course
+
+Course------idtitledescriptionproviderurldifficultyduration_hoursratingthumbnailis_active
+
+CourseSkill
+
+CourseSkill-----------courseskilllevel
+
+CoursePrerequisite
+
+CoursePrerequisite------------------courserequired_skillminimum_level
+
+This enables:
+
+"Statistics is a prerequisite for this Machine Learning course."
+
+Your frontend specifically requires prerequisite warnings.
+
+15. Course Recommendation Engine
+
+This is where IntelliCourse becomes different from a normal LMS.
+
+Don't simply do:
+
+random courses → student
+
+Instead:
+
+Student Profile      │      ├── Branch      ├── Semester      ├── Skills      ├── Interests      ├── Career Goal      ├── Skill Gaps      └── Learning History             │             ▼       Recommendation Engine             │             ▼       Candidate Courses             │             ▼       Ranking Algorithm             │             ▼       Recommended Courses
+
+16. Recommendation Score
+
+Use multiple factors.
+
+For example:
+
+Recommendation ScoreCareer Match       30%Skill Gap Match    25%Interest Match     15%Branch Match       10%Semester Match     10%Difficulty Match    5%Content Similarity  5%
+
+Result:
+
+Machine Learning SpecializationCareer Match       96%Skill Match        91%Interest Match     93%Branch Match       88%Content Similarity 95%Final Match        94%
+
+That directly supports the **"Why Recommended?"** experience in your frontend.
+
+17. Explainable Recommendations
+
+This is extremely important.
+
+Don't return:
+
+recommended = true
+
+Return:
+
+{  "course": "Machine Learning Specialization",  "match_score": 94,  "reasons": [    "Matches your AI Engineer career goal",    "Strengthens your Python skills",    "Addresses your Machine Learning skill gap",    "Suitable for your current semester"  ],  "prerequisites": [    {      "skill": "Statistics",      "required": 60,      "current": 40    }  ]}
+
+Now the frontend can display:
+
+✓ Matches your AI Engineer goal
+
+✓ Strengthens your Python skills
+
+✓ Covers your ML skill gap
+
+⚠ Statistics prerequisite
+
+18. Next Best Action Engine ⭐
+
+This should be one of your signature backend services.
+
+Every time the student logs in:
+
+Student State     ↓Analyze     ↓Find biggest opportunity     ↓Generate actions     ↓Rank actions     ↓Return Next Best Action
+
+Possible actions:
+
+Complete Python AssessmentLearn Statistics FundamentalsStart Machine Learning CourseComplete ML QuizUpdate Career Readiness
+
+Your frontend explicitly defines this as the **signature feature**.
+
+19. Roadmap Engine
+
+The roadmap should not be hard-coded for every student.
+
+Instead:
+
+Career  ↓Required Skills  ↓Skill Dependencies  ↓Student Current Skills  ↓Missing Skills  ↓Learning Sequence  ↓Personalized Roadmap
+
+Example:
+
+Python   ↓Statistics   ↓Machine Learning   ↓Deep Learning   ↓AI Projects   ↓AI Engineer
+
+This corresponds to your interactive roadmap concept.
+
+20. Assessments Backend
+
+Models:
+
+AssessmentQuestionOptionAssessmentAttemptStudentAnswerAssessmentResult
+
+Flow:
+
+Start Assessment      ↓Create Attempt      ↓Serve Questions      ↓Save Answers      ↓Submit      ↓Calculate Score      ↓Determine Skill Level      ↓Update StudentSkill      ↓Recalculate Career Readiness      ↓Update Recommendations
+
+This creates a very strong chain:
+
+**Assessment → Skill → Career Readiness → Recommendation**
+
+Your frontend already specifies updating recommendations after an assessment.
+
+21. Learning Module
+
+Track:
+
+StudentCourse-------------studentcoursestatusprogressstarted_atcompleted_atlast_accessed
+
+Possible status:
+
+SAVEDIN_PROGRESSCOMPLETEDDROPPED
+
+Learning activity:
+
+LearningActivity----------------studentcourseactivity_typedurationtimestampmetadata
+
+Then you can calculate:
+
+Weekly LearningMonthly LearningCourse ProgressLearning StreakCompleted Courses
+
+22. Dashboard API
+
+I strongly agree with the frontend specification's idea of having a single dashboard endpoint instead of making many independent requests.
+
+Create:
+
+GET /api/v1/dashboard/
+
+Response:
+
+{  "student": {},  "career_readiness": 67,  "target_career": {},  "next_action": {},  "skills": [],  "skill_gaps": [],  "recommendations": [],  "learning_progress": {},  "recent_activity": [],  "roadmap": {}}
+
+Frontend:
+
+Dashboard    ↓ONE API request    ↓Complete dashboard data
+
+This will make the application feel much faster.
+
+23. API Architecture
+
+Use versioning from day one.
+
+/api/v1/
+
+Authentication
+
+POST /api/v1/auth/register/POST /api/v1/auth/login/POST /api/v1/auth/refresh/POST /api/v1/auth/logout/POST /api/v1/auth/forgot-password/
+
+Student
+
+GET   /api/v1/student/profile/PATCH /api/v1/student/profile/
+
+Skills
+
+GET /api/v1/skills/GET /api/v1/student/skills/PATCH /api/v1/student/skills/{id}/GET /api/v1/student/skill-gaps/
+
+Careers
+
+GET /api/v1/careers/GET /api/v1/careers/{id}/GET /api/v1/student/careers/GET /api/v1/student/career-readiness/
+
+Courses
+
+GET /api/v1/courses/GET /api/v1/courses/{id}/GET /api/v1/recommendations/
+
+Roadmap
+
+GET /api/v1/roadmap/GET /api/v1/roadmap/{career_id}/
+
+Assessments
+
+GET  /api/v1/assessments/POST /api/v1/assessments/{id}/start/POST /api/v1/attempts/{id}/answer/POST /api/v1/attempts/{id}/submit/GET  /api/v1/attempts/{id}/result/
+
+Learning
+
+GET  /api/v1/learning/POST /api/v1/learning/{course_id}/start/PATCH /api/v1/learning/{course_id}/progress/POST /api/v1/learning/{course_id}/bookmark/
+
+24. AI Advisor Backend
+
+The AI Advisor should sit on top of your structured backend data.
+
+Student   ↓Student Context Builder   ↓SkillsCareerCoursesAssessmentsRoadmapLearning History   ↓AI Advisor   ↓Response
+
+For example, user asks:
+
+"What should I learn next?"
+
+Backend should first retrieve:
+
+Current CareerCurrent SkillsSkill GapsCompleted CoursesCurrent LearningPrerequisitesNext Best Action
+
+Then AI generates the natural-language explanation.
+
+**Don't allow the AI to invent the student's data.**
+
+25. AI Advisor API
+
+POST /api/v1/ai/chat/
+
+Request:
+
+{  "message": "What should I learn next?"}
+
+Backend:
+
+Message ↓Intent detection ↓Student context ↓Relevant database information ↓AI model ↓Validated response
+
+Response:
+
+{  "answer": "Statistics Fundamentals is your best next step...",  "related_actions": [    {      "type": "COURSE",      "id": 42    }  ]}
+
+26. Notifications
+
+Your frontend wants intelligent notifications rather than spam.
+
+Backend:
+
+Notification------------studenttypetitlemessagepriorityis_readcreated_at
+
+Notification events:
+
+Assessment completedSkill improvedCareer readiness changedPrerequisite completedCourse updatedCourse recommendation changed
+
+27. Analytics Backend
+
+Create a separate analytics layer.
+
+Track:
+
+LoginCourse StartedCourse CompletedAssessment StartedAssessment CompletedSkill UpdatedCareer ChangedRecommendation ViewedRecommendation AcceptedRoadmap Node CompletedAI Question Asked
+
+This lets you answer:
+
+Which recommendations are actually useful?
+
+28. Caching
+
+Your frontend plan already identifies relatively static master data such as skill catalogs, career catalogs, course categories, colleges, branches, and regulations as good caching candidates.
+
+Use Redis:
+
+Redis │ ├── Skill catalog ├── Career catalog ├── College list ├── Course categories ├── Dashboard cache └── Recommendation cache
+
+Don't cache highly dynamic information blindly.
+
+29. Background Processing
+
+Some tasks shouldn't happen during the user's HTTP request.
+
+Use:
+
+Celery   +Redis
+
+For example:
+
+Assessment submitted       ↓Queue task       ↓Calculate skill score       ↓Recalculate readiness       ↓Generate recommendations       ↓Update roadmap       ↓Create notification
+
+The user doesn't have to wait for every calculation.
+
+30. Security Architecture
+
+This is where I would be strict.
+
+Implement:
+
+Authentication
+
+Password hashing 
+
+JWT access/refresh tokens 
+
+Token expiration 
+
+Secure password reset 
+
+Authorization
+
+StudentAdminContent Manager
+
+Students should only access their own information.
+
+Example:
+
+/student/123
+
+must not allow student 124 to access it.
+
+API Security
+
+HTTPS 
+
+CORS configuration 
+
+CSRF protection where applicable 
+
+Rate limiting 
+
+Input validation 
+
+Serializer validation 
+
+SQL injection protection through ORM 
+
+Secure environment variables 
+
+Production `DEBUG=False` 
+
+31. Admin Backend
+
+Your admin panel should become a **content management system**, not just Django's default admin.
+
+Admin should manage:
+
+StudentsCollegesBranchesSkillsCareersCareer RequirementsCoursesCourse SkillsPrerequisitesAssessmentsQuestionsRoadmapsNotificationsRecommendation Rules
+
+This allows your project evaluator to see that the system is actually manageable.
+
+32. Recommendation Architecture
+
+I would divide recommendation logic into three levels.
+
+Level 1 — Rule Based
+
+IF career = AI EngineerAND Statistics < required levelTHEN recommend Statistics course
+
+Level 2 — Weighted Ranking
+
+Calculate:
+
+Career MatchSkill MatchInterest MatchAcademic MatchDifficulty Match
+
+Level 3 — AI Explanation
+
+LLM explains:
+
+Why this course?Why now?What will it improve?What prerequisite is missing?
+
+This is far better than:
+
+"AI recommended this."
+
+33. Database Relationship Overview
+
+A simplified ER structure:
+
+                         USER                          │                          │                    STUDENT PROFILE                          │          ┌───────────────┼────────────────┐          │               │                │          ▼               ▼                ▼     STUDENT SKILL    INTERESTS       CAREER GOALS          │                                │          │                                ▼          │                              CAREER          │                                │          │                       CAREER SKILL REQUIREMENT          │                                │          ▼                                ▼        SKILL ◄──────── COURSE ────────► COURSE SKILL          │                   │          │                   ▼          │             PREREQUISITE          │          ▼     ASSESSMENT          │          ▼    ASSESSMENT RESULT          │          ▼     SKILL UPDATE          │          ▼ CAREER READINESS          │          ▼ RECOMMENDATION ENGINE          │          ▼      ROADMAP
+
+34. Backend Development Phases
+
+I would **not** build everything simultaneously.
+
+Phase 1 — Foundation
+
+Build:
+
+Django projectPostgreSQLEnvironment configurationREST FrameworkJWTAPI versioningException handlingLogging
+
+Phase 2 — Authentication
+
+Build:
+
+RegistrationLoginLogoutRefresh tokenPassword resetUser profilePermissions
+
+Phase 3 — Academic System
+
+Build:
+
+UniversityCollegeBranchRegulationSemesterStudent Profile
+
+Phase 4 — Skills
+
+Build:
+
+Skill catalogStudent skillsSkill proficiencySkill assessmentsSkill history
+
+Phase 5 — Careers
+
+Build:
+
+CareerCareer skillsRequired levelsCareer readinessSkill gaps
+
+Phase 6 — Courses
+
+Build:
+
+CourseProviderCourse skillsPrerequisitesDifficultyDurationCategories
+
+Phase 7 — Recommendation Engine ⭐
+
+Build:
+
+Career matchingSkill matchingInterest matchingAcademic matchingRecommendation scoreRecommendation explanation
+
+Phase 8 — Next Best Action ⭐
+
+Build:
+
+Student state analysisPriority calculationAction rankingNext actionAction history
+
+Phase 9 — Roadmap ⭐
+
+Build:
+
+Skill dependenciesCareer roadmapPersonalized roadmapRoadmap progress
+
+Phase 10 — Assessment
+
+Build:
+
+AssessmentQuestionsAttemptsAnswersScoringSkill updates
+
+Phase 11 — Learning
+
+Build:
+
+Course enrollmentProgressBookmarksActivityCompletion
+
+Phase 12 — AI Advisor
+
+Build:
+
+Context builderAI integrationConversation historyRecommendation explanationsGuardrails
+
+Phase 13 — Notifications
+
+Build:
+
+Notification serviceTriggersRead/unreadPreferences
+
+Phase 14 — Analytics
+
+Build:
+
+Learning analyticsAssessment analyticsRecommendation analyticsCareer progressStudent activity
+
+Phase 15 — Production
+
+Finally:
+
+DockerNginxGunicornRedisCeleryPostgreSQL backupLoggingMonitoringSecurityCI/CD
+
+35. Testing Strategy
+
+Don't leave testing until the end.
+
+Unit tests
+
+Test:
+
+Readiness calculationSkill gap calculationRecommendation scorePrerequisite checkingNext-best-action ranking
+
+API tests
+
+Test:
+
+AuthenticationPermissionsCRUDValidationPaginationFiltering
+
+Integration tests
+
+Test:
+
+Assessment   ↓Skill update   ↓Career readiness   ↓Recommendation
+
+This particular chain should have strong automated tests because it is one of the core intelligence loops.
+
+36. Most Important Backend Workflow
+
+If I were designing this project professionally, this would be the central loop:
+
+                STUDENT                   │                   ▼             Academic Profile                   │                   ▼                Skills                   │                   ▼             Career Goal                   │                   ▼           Career Requirements                   │                   ▼              Skill Gap                   │                   ▼         Recommendation Engine                   │                   ▼             Learning Path                   │                   ▼              Assessment                   │                   ▼             Skill Update                   │                   ▼        Career Readiness Update                   │                   ▼          Next Best Action                   │                   └──────────────┐                                  │                                  ▼                             STUDENT
+
+That loop is the **actual intelligence of IntelliCourse AI**.
+
+37. What I Would Build First
+
+Don't start by building the AI chatbot.
+
+I would build these **five things first**:
+
+1. Student Profile
+
+StudentAcademic informationSkillsInterestsCareer goals
+
+2. Skill Engine
+
+Current skillRequired skillSkill gap
+
+3. Career Engine
+
+CareerRequired skillsReadiness score
+
+4. Recommendation Engine
+
+Career   +Skill gap   +Course   ↓Recommendation
+
+5. Next Best Action
+
+Student state      ↓What is the most useful thingthe student should do right now?
+
+Once these five are working, the rest of the application becomes much easier.
+
+38. Final Backend Structure
+
+The final system should look approximately like this:
+
+                         INTELLICOURSE AI                                │                                ▼                         DJANGO REST API                                │       ┌────────────────────────┼─────────────────────────┐       │                        │                         │       ▼                        ▼                         ▼ AUTHENTICATION          STUDENT INTELLIGENCE       CONTENT SYSTEM       │                        │                         │       │                  ┌─────┼─────┐             ┌─────┼─────┐       │                  │     │     │             │     │     │       │                  ▼     ▼     ▼             ▼     ▼     ▼       │                Skills Career Readiness   Courses Skills Careers       │                  │     │     │             │     │     │       │                  └─────┼─────┘             └─────┼─────┘       │                        │                         │       │                        ▼                         │       │                 RECOMMENDATION ◄─────────────────┘       │                        │       │              ┌─────────┼─────────┐       │              ▼         ▼         ▼       │        Next Action  Roadmap   Explanation       │       └────────────────────────┬─────────────────────────                                ▼                         ASSESSMENT ENGINE                                │                                ▼                          LEARNING ENGINE                                │                                ▼                          AI ADVISOR                                │                                ▼                            ANALYTICS                                │                                ▼                           POSTGRESQL
+
+My recommendation
+
+For your project, **do not treat Django as just a CRUD backend**.
+
+Build the backend around these **7 intelligence services**:
+
+**Skill Intelligence** 
+
+**Career Readiness Engine** 
+
+**Skill Gap Engine** 
+
+**Recommendation Engine** 
+
+**Next Best Action Engine** 
+
+**Personalized Roadmap Engine** 
+
+**AI Advisor**

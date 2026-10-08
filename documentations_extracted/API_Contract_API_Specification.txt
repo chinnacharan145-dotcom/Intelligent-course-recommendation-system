@@ -1,0 +1,53 @@
+1. Complete API architecture 
+
+2.Authentication & JWT APIs 
+
+3.Student/profile APIs 
+
+4.Academic APIs 
+
+5.Skills & skill-gap APIs 
+
+6.Careers & career-readiness APIs 
+
+7.Courses & recommendations APIs 
+
+8.Assessments & results APIs 
+
+9.Learning/progress APIs 
+
+10.Roadmap APIs 
+
+11.Next Best Action APIs 
+
+12.AI Advisor APIs 
+
+13.Notifications APIs 
+
+14.Analytics APIs 
+
+15.Dashboard API 
+
+16. Request/response JSON structures 
+
+17.HTTP methods and status codes 
+
+18.Validation rules 
+
+19.Error-response format 
+
+20.Pagination, filtering and sorting 
+
+21. Authorization/role permissions 
+
+22. API versioning 
+
+23.Rate limiting/security 
+
+24.OpenAPI/Swagger structure 
+
+25.API workflow diagrams 
+
+26.Frontend ↔ Backend communication architecture 
+
+27.Endpoint implementation checklist

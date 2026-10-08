@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Course Recommendation System | AP Engineering Guidance</title>
+    
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="Personalized academic and career recommendation platform for engineering students in Andhra Pradesh engineering colleges and universities.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons & Chart.js -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div id="app" class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="title">CourseAI</span>
+                    <span class="subtitle">AP Engineering Portal</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active" data-view="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#recommendations" class="nav-item" data-view="recommendations">
+                    <i data-lucide="compass"></i>
+                    <span>Recommendations</span>
+                </a>
+                <a href="#roadmap" class="nav-item" data-view="roadmap">
+                    <i data-lucide="git-fork"></i>
+                    <span>Learning Roadmap</span>
+                </a>
+                <a href="#skill-gap" class="nav-item" data-view="skill-gap">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Skill Gap Analysis</span>
+                </a>
+                <a href="#careers" class="nav-item" data-view="careers">
+                    <i data-lucide="briefcase"></i>
+                    <span>Career Explorer</span>
+                </a>
+                <a href="#assessments" class="nav-item" data-view="assessments">
+                    <i data-lucide="award"></i>
+                    <span>Skill Assessments</span>
+                </a>
+                <a href="#courses" class="nav-item" data-view="courses">
+                    <i data-lucide="book-open"></i>
+                    <span>Course Catalog</span>
+                </a>
+                <a href="#profile" class="nav-item" data-view="profile">
+                    <i data-lucide="user"></i>
+                    <span>Student Profile</span>
+                </a>
+                <a href="#admin" id="nav-admin" class="nav-item hidden" data-view="admin">
+                    <i data-lucide="shield-check"></i>
+                    <span>Admin Portal</span>
+                </a>
+            </nav>
+
+            <div class="user-card" id="user-sidebar-card">
+                <div class="avatar" id="user-avatar-initials">ST</div>
+                <div class="user-info">
+                    <div class="name" id="user-sidebar-name">Student User</div>
+                    <div class="role" id="user-sidebar-branch">CSE • Sem 4</div>
+                </div>
+                <button class="icon-btn" id="btn-logout" title="Logout">
+                    <i data-lucide="log-out"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Navigation Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="mobile-toggle" id="mobile-sidebar-toggle">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <h1 id="page-title" class="page-title">Student Dashboard</h1>
+                </div>
+                <div class="topbar-right">
+                    <button class="btn btn-outline" id="btn-trigger-onboarding">
+                        <i data-lucide="refresh-cw"></i>
+                        <span>Update Onboarding</span>
+                    </button>
+                    <div class="auth-buttons hidden" id="auth-buttons-container">
+                        <button class="btn btn-outline" id="btn-show-login">Login</button>
+                        <button class="btn btn-primary" id="btn-show-register">Register</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Container for Dynamic Views -->
+            <div id="view-container" class="view-container">
+                <!-- Views loaded dynamically by app.js -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Explanation Modal -->
+    <div class="modal-backdrop hidden" id="modal-explanation">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i data-lucide="sparkles" class="accent-text"></i> Recommendation Breakdown</h3>
+                <button class="modal-close" data-close-modal="modal-explanation"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" id="explanation-modal-body">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal-backdrop hidden" id="modal-feedback">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i data-lucide="thumbs-up"></i> Recommendation Feedback</h3>
+                <button class="modal-close" data-close-modal="modal-feedback"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" id="feedback-modal-body">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main JavaScript App -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

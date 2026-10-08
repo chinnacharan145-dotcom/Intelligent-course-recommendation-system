@@ -1,0 +1,9 @@
+college_id,college_code,college_name,university_short_name,district,city,autonomous,website
+1,JNTUACEA,JNTUA College of Engineering Anantapur,JNTUA,Anantapur,Anantapur,true,https://jntuacea.ac.in
+2,JNTUACEK,JNTUK College of Engineering Kakinada,JNTUK,Kakinada,Kakinada,true,https://jntucek.ac.in
+3,AUCE,Andhra University College of Engineering,AU,Visakhapatnam,Visakhapatnam,true,https://andhrauniversity.edu.in
+4,VRSEC,Velagapudi Ramakrishna Siddhartha Engineering College,JNTUK,NTR Vijayawada,Vijayawada,true,https://vrsiddhartha.ac.in
+5,GVPCE,Gayatri Vidya Parishad College of Engineering,JNTUK,Visakhapatnam,Visakhapatnam,true,https://gvpce.ac.in
+6,RVRJC,RVR & JC College of Engineering,JNTUK,Guntur,Guntur,true,https://rvrjc.ac.in
+7,SRKR,Sagi Ramakrishnam Raju Engineering College,JNTUK,West Godavari,Bhimavaram,true,https://srkr.ac.in
+8,VVIT,Vasireddy Venkatadri Institute of Technology,JNTUK,Guntur,Nambur,true,https://vvitguntur.com
